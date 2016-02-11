@@ -1,0 +1,46 @@
+package ru.linachan.nemesis;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+public class NemesisConfig {
+
+    public static String getURL() {
+        String url = System.getenv("NEMESIS_URL");
+        return (url != null) ? url : "http://localhost/";
+    }
+
+    public static String getHost() {
+        String host = System.getenv("NEMESIS_HOST");
+        return (host != null) ? host : "localhost";
+    }
+
+    public static Integer getPort() {
+        String port = System.getenv("NEMESIS_PORT");
+        return (port != null) ? Integer.valueOf(port) : 29418;
+    }
+
+    public static String getUser() {
+        String user = System.getenv("NEMESIS_USER");
+        return (user != null) ? user : "gerrit";
+    }
+
+    public static File getKey() {
+        String key = System.getenv("NEMESIS_KEY");
+        return new File((key != null) ? key : "~/.ssh/id_rsa");
+    }
+
+    public static String getPassPhrase() {
+        return System.getenv("NEMESIS_KEYPASS");
+    }
+
+    public static Path getRoot() {
+        String path = System.getenv("NEMESIS_ROOT");
+        return Paths.get((path != null) ? path : "./");
+    }
+
+    public static Path getPath(String... paths) {
+        return Paths.get(getRoot().toString(), paths);
+    }
+}
