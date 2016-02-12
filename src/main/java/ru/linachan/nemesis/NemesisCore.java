@@ -1,8 +1,5 @@
 package ru.linachan.nemesis;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
 import ru.linachan.nemesis.executor.EventHandler;
 import ru.linachan.nemesis.gerrit.ChangeRequest;
 import ru.linachan.nemesis.gerrit.Event;
@@ -11,13 +8,12 @@ import ru.linachan.nemesis.gerrit.PatchSet;
 import ru.linachan.nemesis.layout.*;
 import ru.linachan.nemesis.ssh.SSHAuth;
 import ru.linachan.nemesis.ssh.SSHConnection;
-import ru.linachan.nemesis.utils.FileWatchDog;
 import ru.linachan.nemesis.utils.ShutdownHook;
-import ru.linachan.nemesis.utils.Utils;
+import ru.linachan.nemesis.watchdog.JobWatchDog;
+import ru.linachan.nemesis.watchdog.LayoutWatchDog;
+import ru.linachan.nemesis.web.NemesisWeb;
 
 import java.io.*;
-import java.nio.file.Paths;
-import java.nio.file.WatchEvent;
 import java.util.*;
 
 public class NemesisCore {
@@ -27,10 +23,12 @@ public class NemesisCore {
     private SSHAuth serverAuth;
 
     private EventListener eventListener;
+    private NemesisWeb webServer;
+
     private boolean running = true;
 
-    private Layout layout;
-    private Map<String, Job> jobDefinitions;
+    private LayoutWatchDog layoutWatchDog;
+    private JobWatchDog jobWatchDog;
 
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
@@ -48,64 +46,11 @@ public class NemesisCore {
             serverAuth = new SSHAuth(serverKey, serverUser);
         }
 
-        layout = readLayout();
-        jobDefinitions = readJobDefinition();
-
-        setUpWatchDog();
+        layoutWatchDog = new LayoutWatchDog();
+        jobWatchDog = new JobWatchDog();
 
         eventListener = new EventListener(this);
-    }
-
-    private void setUpWatchDog() throws IOException {
-        new Thread(new FileWatchDog(NemesisConfig.getPath("layout").toFile()) {
-            @Override
-            protected void onCreate(WatchEvent event) {
-
-            }
-
-            @Override
-            protected void onModify(WatchEvent event) {
-                try {
-                    layout = readLayout();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            protected void onDelete(WatchEvent event) {
-
-            }
-        }).start();
-
-        new Thread(new FileWatchDog(NemesisConfig.getPath("layout").toFile()) {
-            @Override
-            protected void onCreate(WatchEvent event) {
-                try {
-                    jobDefinitions = readJobDefinition();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            protected void onModify(WatchEvent event) {
-                try {
-                    jobDefinitions = readJobDefinition();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            protected void onDelete(WatchEvent event) {
-                try {
-                    jobDefinitions = readJobDefinition();
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+        webServer = new NemesisWeb();
     }
 
     public SSHConnection getGerritConnection() throws IOException {
@@ -117,13 +62,17 @@ public class NemesisCore {
             NemesisCore instance = new NemesisCore();
 
             instance.run();
-        } catch (IOException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private void run() throws InterruptedException {
+    private void run() throws Exception {
+        layoutWatchDog.start();
+        jobWatchDog.start();
+
         eventListener.start();
+        webServer.start();
 
         while (isRunning()) {
             Thread.sleep(100);
@@ -145,11 +94,11 @@ public class NemesisCore {
     }
 
     public Layout getLayout() {
-        return layout;
+        return layoutWatchDog.getLayout();
     }
 
     public Job getJob(String name) {
-        return jobDefinitions.containsKey(name) ? jobDefinitions.get(name) : name.equals("noop") ? Utils.noopJob() : null;
+        return jobWatchDog.getJob(name);
     }
 
     public void review(ChangeRequest change, PatchSet patchSet, String message, Score... scores) throws IOException {
@@ -160,7 +109,7 @@ public class NemesisCore {
 
     public void review(ChangeRequest change, PatchSet patchSet, String message, List<Score> scores) throws IOException {
         String reviewCommand = String.format(
-                "gerrit review %d,%d", change.getChangeNumber(), patchSet.getPatchSetNumber()
+            "gerrit review %d,%d", change.getChangeNumber(), patchSet.getPatchSetNumber()
         );
 
         for (Score score: scores) {
@@ -183,30 +132,5 @@ public class NemesisCore {
 
         SSHConnection connection = getGerritConnection();
         connection.executeCommand(reviewCommand);
-    }
-
-    private Layout readLayout() throws FileNotFoundException {
-        System.out.println("Reading Nemesis layout...");
-        Yaml layoutParser = new Yaml(new Constructor(Layout.class));
-        return (Layout) layoutParser.load(new FileReader("layout/nemesis.yaml"));
-    }
-
-    private Map<String, Job> readJobDefinition() throws FileNotFoundException {
-        System.out.println("Reading Nemesis job definition...");
-        Map<String, Job> jobDefinitions = new HashMap<>();
-
-        File jobFolder = new File("jobs");
-        Yaml jobParser = new Yaml(new Constructor(JobDefinition.class));
-
-        for (File jobFile: jobFolder.listFiles()) {
-            if (!jobFile.isDirectory()) {
-                JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
-                for (Job job: jobDefinition.jobs) {
-                    jobDefinitions.put(job.name, job);
-                }
-            }
-        }
-
-        return jobDefinitions;
     }
 }

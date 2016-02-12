@@ -18,6 +18,10 @@ public abstract class FileWatchDog implements Runnable {
         );
     }
 
+    public void start() {
+        new Thread(this).start();
+    }
+
     @Override
     public void run() {
         for (;;) {
@@ -31,12 +35,16 @@ public abstract class FileWatchDog implements Runnable {
             for (WatchEvent<?> event: key.pollEvents()) {
                 WatchEvent.Kind<?> kind = event.kind();
 
-                if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-                    onCreate(event);
-                } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-                    onModify(event);
-                } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-                    onDelete(event);
+                try {
+                    if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
+                        onCreate(event);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+                        onModify(event);
+                    } else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+                        onDelete(event);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
 
@@ -47,7 +55,7 @@ public abstract class FileWatchDog implements Runnable {
         }
     }
 
-    protected abstract void onCreate(WatchEvent event);
-    protected abstract void onModify(WatchEvent event);
-    protected abstract void onDelete(WatchEvent event);
+    protected abstract void onCreate(WatchEvent event) throws IOException;
+    protected abstract void onModify(WatchEvent event) throws IOException;
+    protected abstract void onDelete(WatchEvent event) throws IOException;
 }
