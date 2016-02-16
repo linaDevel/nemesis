@@ -1,6 +1,5 @@
 package ru.linachan.nemesis.executor;
 
-import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.NemesisCore;
 import ru.linachan.nemesis.gerrit.Event;
 import ru.linachan.nemesis.layout.Job;
@@ -81,8 +80,9 @@ public class PipeLineExecutor implements Runnable {
             for (JobExecutor executor: jobExecutors) {
                 boolean jobSuccess = (executor.getExitCode() == 0);
                 jobsResult += String.format(
-                    "* %s : %s\n",
+                    "* %s %s : %s\n",
                     executor.getJob(),
+                    Utils.getJobLogURL(executor.getJob(), event),
                     (jobSuccess ? "SUCCESS" : "FAILURE") + (executor.getVoting() ? "" : " (non-voting)")
                 );
 

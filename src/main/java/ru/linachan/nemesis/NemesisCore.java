@@ -33,12 +33,12 @@ public class NemesisCore {
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
 
-        serverHost = NemesisConfig.getHost();
-        serverPort = NemesisConfig.getPort();
+        serverHost = NemesisConfig.getGerritHost();
+        serverPort = NemesisConfig.getGerritPort();
 
-        String serverUser = NemesisConfig.getUser();
-        File serverKey = NemesisConfig.getKey();
-        String serverPassPhrase = NemesisConfig.getPassPhrase();
+        String serverUser = NemesisConfig.getGerritUser();
+        File serverKey = NemesisConfig.getGerritKey();
+        String serverPassPhrase = NemesisConfig.getGerritPassPhrase();
 
         if (serverPassPhrase.length() > 0) {
             serverAuth = new SSHAuth(serverKey, serverUser, serverPassPhrase);

@@ -62,6 +62,16 @@ public class Utils {
         return Utils.ensureDirectory(new File(patchSetLogsDir, jobName), true);
     }
 
+    public static String getJobLogURL(String jobName, Event event) {
+        Integer changeID = event.getChangeRequest().getChangeNumber();
+        Integer pathSetID = event.getPatchSet().getPatchSetNumber();
+
+        return String.format(
+            "%s%s/%s/%s/%s",
+            NemesisConfig.getNemesisURL(), changeID % 100, changeID, pathSetID, jobName
+        );
+    }
+
     public static Score approvalToScore(Approval approval) {
         Score score = new Score();
         switch (approval.getType()) {

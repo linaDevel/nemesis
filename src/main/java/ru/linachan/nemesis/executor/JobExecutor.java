@@ -60,6 +60,7 @@ public class JobExecutor implements Runnable {
             ProcessBuilder processBuilder = new ProcessBuilder(jobScript.getPath());
             File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
 
+            processBuilder.environment().clear();
             processBuilder.environment().put("WORKSPACE", tmpWorkingDirectory.getAbsolutePath());
 
             if (job.env != null) {
@@ -121,7 +122,7 @@ public class JobExecutor implements Runnable {
 
     public void setEventData(Event event) {
         if ((event.getPatchSet() != null)&&(event.getChangeRequest() != null)) {
-            environment.put("NEMESIS_URL", NemesisConfig.getURL());
+            environment.put("NEMESIS_URL", NemesisConfig.getGerritURL());
             environment.put("NEMESIS_PROJECT", event.getChangeRequest().getProject());
             environment.put("NEMESIS_BRANCH", event.getChangeRequest().getBranch());
             environment.put("NEMESIS_REF", event.getPatchSet().getRef());
