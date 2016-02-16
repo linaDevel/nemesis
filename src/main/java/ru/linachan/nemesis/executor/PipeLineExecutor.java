@@ -38,17 +38,18 @@ public class PipeLineExecutor implements Runnable {
 
         jobs.stream().filter(job -> job != null).forEach(job -> {
             JobExecutor executor = new JobExecutor(job);
-            executor.setEventData(event);
-
-            try {
-                executor.setLogDir(Utils.createJobLogDirectory(job.name, event));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
             if (job.name.equals("noop")) {
                 executor.noop();
             } else {
+                executor.setEventData(event);
+
+                try {
+                    executor.setLogDir(Utils.createJobLogDirectory(job.name, event));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
                 executor.execute();
             }
 

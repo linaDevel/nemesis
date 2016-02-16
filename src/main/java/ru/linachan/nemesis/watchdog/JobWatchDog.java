@@ -6,6 +6,7 @@ import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.layout.JobDefinition;
 import ru.linachan.nemesis.utils.FileWatchDog;
+import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -59,6 +60,8 @@ public class JobWatchDog extends FileWatchDog {
     }
 
     public Job getJob(String name) {
+        if (name.equals("noop"))
+            return Utils.noopJob();
         return jobData.containsKey(name) ? jobData.get(name) : null;
     }
 }

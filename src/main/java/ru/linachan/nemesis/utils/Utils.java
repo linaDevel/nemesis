@@ -66,6 +66,9 @@ public class Utils {
         Integer changeID = event.getChangeRequest().getChangeNumber();
         Integer pathSetID = event.getPatchSet().getPatchSetNumber();
 
+        if (jobName.equals("noop"))
+            return "";
+
         return String.format(
             "%s%s/%s/%s/%s",
             NemesisConfig.getNemesisURL(), changeID % 100, changeID, pathSetID, jobName
