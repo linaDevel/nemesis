@@ -1,5 +1,6 @@
 package ru.linachan.nemesis.executor.builder;
 
+import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.executor.JobIOThread;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
@@ -44,6 +45,7 @@ public abstract class SimpleBuilder {
 
         processBuilder.environment().clear();
         processBuilder.environment().put("WORKSPACE", workingDirectory.getAbsolutePath());
+        processBuilder.environment().put("SSH_KEY", NemesisConfig.getGerritKey().getAbsolutePath());
 
         if (job.env != null) {
             processBuilder.environment().putAll(job.env);
