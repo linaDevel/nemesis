@@ -39,19 +39,15 @@ public class PipeLineExecutor implements Runnable {
         jobs.stream().filter(job -> job != null).forEach(job -> {
             JobExecutor executor = new JobExecutor(job);
 
-            if (job.name.equals("noop")) {
-                executor.noop();
-            } else {
-                executor.setEventData(event);
+            executor.setEventData(event);
 
-                try {
-                    executor.setLogDir(Utils.createJobLogDirectory(job.name, event));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-                executor.execute();
+            try {
+                executor.setLogDir(Utils.createJobLogDirectory(job.name, event));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+
+            executor.execute();
 
             jobExecutors.add(executor);
         });
@@ -79,24 +75,24 @@ public class PipeLineExecutor implements Runnable {
             boolean isSuccess = true;
 
             for (JobExecutor executor: jobExecutors) {
-                boolean jobSuccess = (executor.getExitCode() == 0);
+                boolean jobSuccess = (executor.isSuccess());
                 jobsResult += String.format(
                     "* %s %s : %s\n",
-                    executor.getJob(),
-                    Utils.getJobLogURL(executor.getJob(), event),
-                    (jobSuccess ? "SUCCESS" : "FAILURE") + (executor.getVoting() ? "" : " (non-voting)")
+                    executor.getJob().name,
+                    Utils.getJobLogURL(executor.getJob().name, event),
+                    (jobSuccess ? "SUCCESS" : "FAILURE") + (executor.getJob().voting ? "" : " (non-voting)")
                 );
 
                 System.out.println(String.format(
                     "%s::%s : %s%s",
-                    pipeLine.name, executor.getJob(),
-                    jobSuccess ? "SUCCESS" : "FAILURE", executor.getVoting() ? "" : " (non-voting)"
+                    pipeLine.name, executor.getJob().name,
+                    jobSuccess ? "SUCCESS" : "FAILURE", executor.getJob().voting ? "" : " (non-voting)"
                 ));
 
                 try {
                     File logFile = new File(executor.getLogDir(), "console.log");
                     FileWriter logFileWriter = new FileWriter(logFile);
-                    for (String logLine: executor.getProcessOutput()) {
+                    for (String logLine: executor.getOutput()) {
                         logFileWriter.write(String.format("%s\r\n", logLine));
                     }
                     logFileWriter.flush();
@@ -105,7 +101,7 @@ public class PipeLineExecutor implements Runnable {
                     e.printStackTrace();
                 }
 
-                isSuccess = !(isSuccess && executor.getVoting()) || jobSuccess;
+                isSuccess = !(isSuccess && executor.getJob().voting) || jobSuccess;
             }
 
             String message = String.format(

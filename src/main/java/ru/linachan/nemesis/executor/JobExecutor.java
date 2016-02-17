@@ -2,7 +2,12 @@ package ru.linachan.nemesis.executor;
 
 import org.apache.commons.io.FileUtils;
 import ru.linachan.nemesis.NemesisConfig;
+import ru.linachan.nemesis.executor.builder.NoopBuilder;
+import ru.linachan.nemesis.executor.builder.PythonBuilder;
+import ru.linachan.nemesis.executor.builder.ShellBuilder;
+import ru.linachan.nemesis.executor.builder.SimpleBuilder;
 import ru.linachan.nemesis.gerrit.Event;
+import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
@@ -19,16 +24,13 @@ public class JobExecutor implements Runnable {
 
     private Job job;
 
-    private Integer exitCode;
-
-    private JobIOThread jobIOThread = null;
-
-    private boolean started = false;
-    private boolean running = false;
-
     private Map<String, String> environment = new HashMap<>();
 
     private File logDir;
+    private List<String> outputLog = new ArrayList();
+
+    private boolean running = true;
+    private boolean success = true;
 
     public JobExecutor(Job jobDefinition) {
         job = jobDefinition;
@@ -39,85 +41,53 @@ public class JobExecutor implements Runnable {
         executionThread.start();
     }
 
-    public void noop() {
-        started = true;
-        running = false;
-        exitCode = 0;
-    }
-
     @Override
     public void run() {
         try {
-            File jobScript = Utils.createTempFile(job.name);
-            jobScript.setExecutable(true);
-
-            FileWriter jobScriptWriter = new FileWriter(jobScript);
-
-            jobScriptWriter.write(job.shell);
-            jobScriptWriter.flush();
-            jobScriptWriter.close();
-
-            ProcessBuilder processBuilder = new ProcessBuilder(jobScript.getPath());
             File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
 
-            processBuilder.environment().clear();
-            processBuilder.environment().put("WORKSPACE", tmpWorkingDirectory.getAbsolutePath());
+            for (Builder builder: job.builders) {
+                SimpleBuilder jobBuilder;
 
-            if (job.env != null) {
-                processBuilder.environment().putAll(job.env);
+                switch (builder.type) {
+                    case SHELL:
+                        jobBuilder = new ShellBuilder(job, builder, tmpWorkingDirectory);
+                        break;
+                    case PYTHON:
+                        jobBuilder = new PythonBuilder(job, builder, tmpWorkingDirectory);
+                        break;
+                    case NOOP:
+                    default:
+                        jobBuilder = new NoopBuilder(job, builder, tmpWorkingDirectory);
+                }
+
+                outputLog.add(String.format("INFO[%s]: Starting builder", builder.type));
+
+                jobBuilder.setEnvironment(environment);
+                int exitCode = jobBuilder.execute();
+
+                outputLog.addAll(jobBuilder.getOutput());
+                success = success && (exitCode == 0);
+
+                if (!success)
+                    break;
             }
-
-            processBuilder.environment().putAll(environment);
-
-            Process process = processBuilder.directory(tmpWorkingDirectory).start();
-
-            started = true;
-            running = true;
-
-            InputStream processOutput = process.getInputStream();
-
-            jobIOThread = new JobIOThread(this, processOutput);
-            new Thread(jobIOThread).start();
-
-            process.waitFor();
-
-            exitCode = process.exitValue();
-
-            process.destroy();
 
             File artifactsDir = new File(tmpWorkingDirectory, "artifacts");
             if (artifactsDir.exists()) {
                 FileUtils.copyDirectory(artifactsDir, new File(logDir, "artifacts"));
             }
 
-            jobScript.delete();
             tmpWorkingDirectory.delete();
-        } catch(InterruptedException | IOException e) {
-            jobIOThread.putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
-            exitCode = 1;
+        } catch (InterruptedException | IOException e) {
+            outputLog.add(String.format("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage()));
         } finally {
             running = false;
         }
     }
 
-    public boolean isRunning() {
-        return running || !started;
-    }
-
-    public String getJob() {
-        return job.name;
-    }
-
-    public Integer getExitCode() {
-        return exitCode;
-    }
-
-    public List<String> getProcessOutput() {
-        return (jobIOThread != null) ? jobIOThread.getOutput() : new ArrayList<>();
-    }
-
-    public boolean getVoting() {
-        return job.voting;
+    public Job getJob() {
+        return job;
     }
 
     public void setEventData(Event event) {
@@ -135,5 +105,17 @@ public class JobExecutor implements Runnable {
 
     public File getLogDir() {
         return logDir;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    public boolean isSuccess() {
+        return success;
+    }
+
+    public List<String> getOutput() {
+        return outputLog;
     }
 }

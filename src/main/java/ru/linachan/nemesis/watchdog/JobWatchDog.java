@@ -50,7 +50,7 @@ public class JobWatchDog extends FileWatchDog {
         Yaml jobParser = new Yaml(new Constructor(JobDefinition.class));
 
         for (File jobFile: jobsDir.listFiles()) {
-            if (!jobFile.isDirectory()) {
+            if (!jobFile.isDirectory()&&jobFile.getName().endsWith(".yaml")) {
                 JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
                 for (Job job: jobDefinition.jobs) {
                     jobData.put(job.name, job);

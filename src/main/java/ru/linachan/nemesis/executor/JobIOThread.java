@@ -1,5 +1,7 @@
 package ru.linachan.nemesis.executor;
 
+import ru.linachan.nemesis.executor.builder.SimpleBuilder;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -8,11 +10,11 @@ import java.util.List;
 
 public class JobIOThread implements Runnable {
 
-    private JobExecutor process;
+    private SimpleBuilder process;
     private InputStream outputStream;
     private List<String> outputLog;
 
-    public JobIOThread(JobExecutor process, InputStream outputStream) {
+    public JobIOThread(SimpleBuilder process, InputStream outputStream) {
         this.process = process;
         this.outputStream = outputStream;
         this.outputLog = new ArrayList<>();

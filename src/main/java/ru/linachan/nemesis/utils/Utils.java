@@ -10,6 +10,7 @@ import ru.linachan.nemesis.layout.ScoreType;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class Utils {
 
@@ -97,6 +98,7 @@ public class Utils {
         Job noopJob = new Job();
 
         noopJob.name = "noop";
+        noopJob.builders = new ArrayList<>();
 
         return noopJob;
     }
