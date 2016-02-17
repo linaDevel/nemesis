@@ -1,5 +1,10 @@
 package ru.linachan.nemesis.executor;
 
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.VelocityEngine;
+import org.apache.velocity.runtime.RuntimeConstants;
+import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import ru.linachan.nemesis.NemesisCore;
 import ru.linachan.nemesis.gerrit.Event;
 import ru.linachan.nemesis.layout.Job;
@@ -80,6 +85,28 @@ public class PipeLineExecutor implements Runnable {
             String jobsResult = "";
             boolean isSuccess = true;
 
+            VelocityEngine vEngine = new VelocityEngine();
+            Template vTemplate = null;
+            VelocityContext vContext = new VelocityContext();
+            boolean vEngineReady;
+
+            try {
+                vEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+                vEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
+
+                vEngine.init();
+                vTemplate = vEngine.getTemplate("/templates/console.vm");
+
+                vEngineReady = true;
+            } catch (Exception e) {
+                System.err.println(String.format(
+                    "Unable to initialize Velocity: [%s]: %s",
+                    e.getClass().getSimpleName(), e.getMessage()
+                ));
+
+                vEngineReady = false;
+            }
+
             for (JobExecutor executor: jobExecutors) {
                 boolean jobSuccess = (executor.isSuccess());
                 jobsResult += String.format(
@@ -96,13 +123,27 @@ public class PipeLineExecutor implements Runnable {
                 ));
 
                 try {
-                    File logFile = new File(executor.getLogDir(), "console.log");
-                    FileWriter logFileWriter = new FileWriter(logFile);
-                    for (String logLine: executor.getOutput()) {
-                        logFileWriter.write(String.format("%s\r\n", logLine));
+                    if (vEngineReady) {
+                        File logFile = new File(executor.getLogDir(), "console.html");
+                        FileWriter logFileWriter = new FileWriter(logFile);
+
+                        vContext.put("log_data", executor.getOutput());
+
+                        vTemplate.merge(vContext, logFileWriter);
+
+                        logFileWriter.flush();
+                        logFileWriter.close();
+                    } else {
+                        File logFile = new File(executor.getLogDir(), "console.log");
+                        FileWriter logFileWriter = new FileWriter(logFile);
+
+                        for (String logLine : executor.getOutput()) {
+                            logFileWriter.write(String.format("%s\r\n", logLine));
+                        }
+
+                        logFileWriter.flush();
+                        logFileWriter.close();
                     }
-                    logFileWriter.flush();
-                    logFileWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
