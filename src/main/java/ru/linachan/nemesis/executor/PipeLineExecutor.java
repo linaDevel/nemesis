@@ -69,6 +69,12 @@ public class PipeLineExecutor implements Runnable {
                 isExecuting = jobExecutors.stream()
                     .filter(JobExecutor::isRunning)
                     .findFirst().isPresent();
+
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             String jobsResult = "";

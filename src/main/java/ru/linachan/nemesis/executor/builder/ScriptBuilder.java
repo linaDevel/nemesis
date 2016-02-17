@@ -23,7 +23,7 @@ public abstract class ScriptBuilder extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
-        jobScriptWriter.write(getBuilder().params.get("script"));
+        jobScriptWriter.write((String) getBuilder().params.get("script"));
         jobScriptWriter.flush();
         jobScriptWriter.close();
     }

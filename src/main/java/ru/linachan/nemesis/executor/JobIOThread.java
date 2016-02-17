@@ -3,6 +3,7 @@ package ru.linachan.nemesis.executor;
 import ru.linachan.nemesis.executor.builder.SimpleBuilder;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -22,21 +23,18 @@ public class JobIOThread implements Runnable {
 
     @Override
     public void run() {
-        while (process.isRunning()) {
-            try {
-                final BufferedReader reader = new BufferedReader(new InputStreamReader(outputStream));
-
-                String line;
-
-                while ((line = reader.readLine()) != null) {
-                    outputLog.add(line);
-                }
-
-                reader.close();
-            } catch (final Exception e) {
-                // Ignore exception
+        try {
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(outputStream));
+            while (process.isRunning()) {
+                try {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        outputLog.add(line);
+                    }
+                } catch (final IOException ignored) {}
             }
-        }
+            reader.close();
+        } catch (final IOException ignored) {}
     }
 
     public List<String> getOutput() {

@@ -5,6 +5,6 @@ import java.util.Map;
 public class Builder {
 
     public BuilderType type;
-    public Map<String, String> params;
+    public Map<String, Object> params;
 
 }

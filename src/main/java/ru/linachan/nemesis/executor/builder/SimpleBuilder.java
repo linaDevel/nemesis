@@ -7,7 +7,6 @@ import ru.linachan.nemesis.layout.Job;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,7 +69,8 @@ public abstract class SimpleBuilder {
         started = true;
 
         jobIOThread = new JobIOThread(this, processOutput);
-        new Thread(jobIOThread).start();
+        Thread ioThread = new Thread(jobIOThread);
+        ioThread.start();
 
         process.waitFor();
 
@@ -79,6 +79,9 @@ public abstract class SimpleBuilder {
         process.destroy();
 
         postBuild();
+
+        running = false;
+        ioThread.join();
 
         return exitCode;
     }
@@ -91,11 +94,11 @@ public abstract class SimpleBuilder {
         return exitCode;
     }
 
-    protected abstract void postBuild();
+    protected abstract void preBuild() throws IOException;
 
     protected abstract ProcessBuilder build();
 
-    protected abstract void preBuild() throws IOException;
+    protected abstract void postBuild();
 
     public List<String> getOutput() {
         return jobIOThread.getOutput();
