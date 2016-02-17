@@ -1,6 +1,8 @@
 package ru.linachan.nemesis.executor;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.executor.builder.NoopBuilder;
 import ru.linachan.nemesis.executor.builder.PythonBuilder;
@@ -45,6 +47,21 @@ public class JobExecutor implements Runnable {
     public void run() {
         try {
             File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
+
+            try (Git repo = Git.cloneRepository()
+                .setURI(String.format(
+                    "%s/%s",
+                    environment.get("NEMESIS_URL"),
+                    environment.get("NEMESIS_PROJECT")
+                ))
+                .setBranch(environment.get("NEMESIS_BRANCH"))
+                .setDirectory(new File(tmpWorkingDirectory, "source"))
+                .call()
+            ) {
+                repo.checkout().setName(environment.get("NEMESIS_REF")).call();
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
 
             for (Builder builder: job.builders) {
                 SimpleBuilder jobBuilder;
