@@ -1,6 +1,10 @@
 package ru.linachan.nemesis.executor;
 
 import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.RefSpec;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.executor.builder.NoopBuilder;
 import ru.linachan.nemesis.executor.builder.PythonBuilder;
@@ -46,6 +50,31 @@ public class JobExecutor implements Runnable {
         try {
             File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
 
+            outputLog.add(String.format("INFO[GIT]: Cloning repository %s", environment.get("NEMESIS_PROJECT")));
+
+            try (Git repo = Git.cloneRepository()
+                .setURI(String.format(
+                    "%s/%s",
+                    environment.get("NEMESIS_URL"),
+                    environment.get("NEMESIS_PROJECT")
+                ))
+                .setBranch(environment.get("NEMESIS_BRANCH"))
+                .setDirectory(new File(tmpWorkingDirectory, "source"))
+                .call()
+            ) {
+
+                repo.fetch().setRefSpecs(new RefSpec(environment.get("NEMESIS_REF"))).call();
+                repo.checkout().setName("FETCH_HEAD").call();
+
+                outputLog.add(String.format(
+                    "INFO[GIT]: Checking out %s",
+                    repo.log().setMaxCount(1).call().iterator().next().getName()
+                ));
+
+            } catch (GitAPIException e) {
+                e.printStackTrace();
+            }
+
             for (Builder builder: job.builders) {
                 SimpleBuilder jobBuilder;
 
@@ -67,14 +96,18 @@ public class JobExecutor implements Runnable {
                 int exitCode = jobBuilder.execute();
 
                 outputLog.addAll(jobBuilder.getOutput());
+                outputLog.add(String.format("INFO[%s]: Builder exited with code %d", builder.type, exitCode));
+
                 success = success && (exitCode == 0);
 
                 if (!success)
+                    outputLog.add(String.format("ERROR[%s]: Interrupting build", builder.type));
                     break;
             }
 
             File artifactsDir = new File(tmpWorkingDirectory, "artifacts");
             if (artifactsDir.exists()) {
+                outputLog.add("INFO[POST_BUILD]: Copying artifacts");
                 FileUtils.copyDirectory(artifactsDir, new File(logDir, "artifacts"));
             }
 
