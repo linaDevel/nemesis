@@ -8,6 +8,7 @@ import ru.linachan.nemesis.layout.Job;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ public abstract class SimpleBuilder {
     private File workingDirectory;
     private Map<String, String> environment = new HashMap<>();
 
-    private JobIOThread jobIOThread;
+    private List<String> jobOutput = new ArrayList<>();
 
     private boolean running;
     private boolean started;
@@ -75,12 +76,15 @@ public abstract class SimpleBuilder {
 
         if (processBuilder != null) {
             Process process = processBuilder.start();
-            InputStream processOutput = process.getInputStream();
+            InputStream outputStream = process.getInputStream();
+            InputStream errorStream = process.getErrorStream();
 
 
-            jobIOThread = new JobIOThread(this, processOutput);
-            Thread ioThread = new Thread(jobIOThread);
-            ioThread.start();
+            Thread outThread = new Thread(new JobIOThread(this, outputStream, "O"));
+            Thread errThread = new Thread(new JobIOThread(this, errorStream, "E"));
+
+            outThread.start();
+            errThread.start();
 
             process.waitFor();
 
@@ -91,7 +95,9 @@ public abstract class SimpleBuilder {
             postBuild();
 
             running = false;
-            ioThread.join();
+
+            outThread.join();
+            errThread.join();
         } else {
             running = false;
         }
@@ -103,10 +109,6 @@ public abstract class SimpleBuilder {
         return running || !started;
     }
 
-    public Integer getExitCode() {
-        return exitCode;
-    }
-
     protected abstract void preBuild() throws IOException;
 
     protected abstract ProcessBuilder build();
@@ -114,6 +116,10 @@ public abstract class SimpleBuilder {
     protected abstract void postBuild();
 
     public List<String> getOutput() {
-        return jobIOThread.getOutput();
+        return jobOutput;
+    }
+
+    public synchronized void putLine(String line, String... args) {
+        jobOutput.add(String.format(line, args));
     }
 }

@@ -6,30 +6,28 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 public class JobIOThread implements Runnable {
 
     private SimpleBuilder process;
-    private InputStream outputStream;
-    private List<String> outputLog;
+    private InputStream stream;
+    private String prefix;
 
-    public JobIOThread(SimpleBuilder process, InputStream outputStream) {
+    public JobIOThread(SimpleBuilder process, InputStream stream, String prefix) {
         this.process = process;
-        this.outputStream = outputStream;
-        this.outputLog = new ArrayList<>();
+        this.stream = stream;
+        this.prefix = prefix;
     }
 
     @Override
     public void run() {
         try {
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(outputStream));
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
             while (process.isRunning()) {
                 try {
                     String line;
                     while ((line = reader.readLine()) != null) {
-                        outputLog.add(line);
+                        putLine("%s: %s", prefix, line);
                     }
                 } catch (final IOException ignored) {}
             }
@@ -37,11 +35,7 @@ public class JobIOThread implements Runnable {
         } catch (final IOException ignored) {}
     }
 
-    public List<String> getOutput() {
-        return outputLog;
-    }
-
     public void putLine(String line, String... args) {
-        outputLog.add(String.format(line, (Object) args));
+        process.putLine(line, args);
     }
 }
