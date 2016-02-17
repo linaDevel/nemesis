@@ -59,29 +59,40 @@ public abstract class SimpleBuilder {
         environment.putAll(newEnvironment);
     }
 
+    public void setEnvironment(String key, String value) {
+        environment.put(key, value);
+    }
+
     public Integer execute() throws InterruptedException, IOException {
         preBuild();
 
-        Process process = build().start();
-        InputStream processOutput = process.getInputStream();
+        ProcessBuilder processBuilder = build();
 
         running = true;
         started = true;
 
-        jobIOThread = new JobIOThread(this, processOutput);
-        Thread ioThread = new Thread(jobIOThread);
-        ioThread.start();
+        if (processBuilder != null) {
+            Process process = processBuilder.start();
+            InputStream processOutput = process.getInputStream();
 
-        process.waitFor();
 
-        exitCode = process.exitValue();
+            jobIOThread = new JobIOThread(this, processOutput);
+            Thread ioThread = new Thread(jobIOThread);
+            ioThread.start();
 
-        process.destroy();
+            process.waitFor();
 
-        postBuild();
+            exitCode = process.exitValue();
 
-        running = false;
-        ioThread.join();
+            process.destroy();
+
+            postBuild();
+
+            running = false;
+            ioThread.join();
+        } else {
+            running = false;
+        }
 
         return exitCode;
     }

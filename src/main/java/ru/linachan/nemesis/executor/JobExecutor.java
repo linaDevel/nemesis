@@ -3,7 +3,6 @@ package ru.linachan.nemesis.executor;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.RefSpec;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.executor.builder.NoopBuilder;
@@ -16,9 +15,7 @@ import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
