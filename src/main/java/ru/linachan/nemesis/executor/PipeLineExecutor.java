@@ -133,17 +133,17 @@ public class PipeLineExecutor implements Runnable {
 
                         logFileWriter.flush();
                         logFileWriter.close();
-                    } else {
-                        File logFile = new File(executor.getLogDir(), "console.log");
-                        FileWriter logFileWriter = new FileWriter(logFile);
-
-                        for (String logLine : executor.getOutput()) {
-                            logFileWriter.write(String.format("%s\r\n", logLine));
-                        }
-
-                        logFileWriter.flush();
-                        logFileWriter.close();
                     }
+
+                    File logFile = new File(executor.getLogDir(), "console.log");
+                    FileWriter logFileWriter = new FileWriter(logFile);
+
+                    for (String logLine : executor.getOutput()) {
+                        logFileWriter.write(String.format("%s\r\n", logLine));
+                    }
+
+                    logFileWriter.flush();
+                    logFileWriter.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
