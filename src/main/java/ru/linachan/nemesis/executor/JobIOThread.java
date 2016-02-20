@@ -35,7 +35,7 @@ public class JobIOThread implements Runnable {
         } catch (final IOException ignored) {}
     }
 
-    public void putLine(String line, String... args) {
+    public void putLine(String line, String... args) throws IOException {
         process.putLine(line, args);
     }
 }

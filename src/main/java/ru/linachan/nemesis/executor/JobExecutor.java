@@ -24,6 +24,7 @@ public class JobExecutor implements Runnable {
     private Map<String, String> environment = new HashMap<>();
 
     private File logDir;
+    private File workingDirectory;
 
     private boolean running = true;
     private boolean success = true;
@@ -47,7 +48,7 @@ public class JobExecutor implements Runnable {
             logFileWriter = new FileWriter(logFile);
 
             startTime = System.currentTimeMillis();
-            File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
+            workingDirectory = Utils.createTempDirectory(job.name + "-wd");
 
             putLine("INFO[GIT]: Cloning repository %s", environment.get("NEMESIS_PROJECT"));
 
@@ -58,7 +59,7 @@ public class JobExecutor implements Runnable {
                     environment.get("NEMESIS_PROJECT")
                 ))
                 .setBranch(environment.get("NEMESIS_BRANCH"))
-                .setDirectory(new File(tmpWorkingDirectory, "source"))
+                .setDirectory(new File(workingDirectory, "source"))
                 .call()
             ) {
 
@@ -79,23 +80,23 @@ public class JobExecutor implements Runnable {
 
                 switch (builder.type) {
                     case SHELL:
-                        jobBuilder = new ShellBuilder(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new ShellBuilder(this, job, builder, workingDirectory);
                         break;
                     case PYTHON:
-                        jobBuilder = new PythonBuilder(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new PythonBuilder(this, job, builder, workingDirectory);
                         break;
                     case MAVEN:
-                        jobBuilder = new MavenBuilder(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new MavenBuilder(this, job, builder, workingDirectory);
                         break;
                     case DOCKER:
-                        jobBuilder = new DockerBuilder(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new DockerBuilder(this, job, builder, workingDirectory);
                         break;
                     case PUBLISH:
-                        jobBuilder = new SSHPublisher(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new SSHPublisher(this, job, builder, workingDirectory);
                         break;
                     case NOOP:
                     default:
-                        jobBuilder = new NoopBuilder(this, job, builder, tmpWorkingDirectory);
+                        jobBuilder = new NoopBuilder(this, job, builder, workingDirectory);
                 }
 
                 putLine("INFO[%s]: Starting builder", builder.type);
@@ -113,7 +114,7 @@ public class JobExecutor implements Runnable {
                 }
             }
 
-            File artifactsDir = new File(tmpWorkingDirectory, "artifacts");
+            File artifactsDir = new File(workingDirectory, "artifacts");
             if (artifactsDir.exists()) {
                 putLine("INFO[POST_BUILD]: Copying artifacts");
                 FileUtils.copyDirectory(artifactsDir, new File(logDir, "artifacts"));
@@ -122,13 +123,17 @@ public class JobExecutor implements Runnable {
             Long stopTime = System.currentTimeMillis();
             putLine("INFO[TIME]: Job completed in %5.3f", (stopTime - startTime) / 1000.0);
 
-            tmpWorkingDirectory.delete();
             logFileWriter.flush();
             logFileWriter.close();
         } catch (InterruptedException | IOException e) {
-            putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
+            try {
+                putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             success = false;
         } finally {
+            workingDirectory.delete();
             running = false;
         }
     }
@@ -158,16 +163,12 @@ public class JobExecutor implements Runnable {
         return success;
     }
 
-    public void putLine(String line, Object... args) {
-        try {
-            logFileWriter.write(String.format(
-                " [%10.3f] %s\n",
-                (System.currentTimeMillis() - startTime) / 1000.0,
-                String.format(line, args)
-            ));
-            logFileWriter.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void putLine(String line, Object... args) throws IOException {
+        logFileWriter.write(String.format(
+            " [%10.3f] %s\n",
+            (System.currentTimeMillis() - startTime) / 1000.0,
+            String.format(line, args)
+        ));
+        logFileWriter.flush();
     }
 }
