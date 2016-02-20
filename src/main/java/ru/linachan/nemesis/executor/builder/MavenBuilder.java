@@ -54,6 +54,6 @@ public class MavenBuilder extends SimpleBuilder {
 
     @Override
     protected void postBuild() {
-        //jobScript.delete();
+        jobScript.delete();
     }
 }

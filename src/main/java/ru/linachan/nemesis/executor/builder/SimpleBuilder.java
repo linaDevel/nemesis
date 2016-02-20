@@ -116,7 +116,7 @@ public abstract class SimpleBuilder {
 
     protected abstract void postBuild();
 
-    public synchronized void putLine(String line, Object... args) {
+    public synchronized void putLine(String line, Object... args) throws IOException {
         executor.putLine(String.format(line, args));
     }
 }
