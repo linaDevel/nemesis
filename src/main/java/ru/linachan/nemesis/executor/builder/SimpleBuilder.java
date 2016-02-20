@@ -18,7 +18,7 @@ public abstract class SimpleBuilder {
     private Builder builder;
     private Job job;
 
-    private File workingDirectory;
+    protected File workingDirectory;
     private Map<String, String> environment = new HashMap<>();
 
     private List<String> jobOutput = new ArrayList<>();
