@@ -1,5 +1,6 @@
 package ru.linachan.nemesis.executor.builder;
 
+import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 
@@ -8,8 +9,8 @@ import java.io.IOException;
 
 public class NoopBuilder extends SimpleBuilder {
 
-    public NoopBuilder(Job job, Builder builder, File workingDirectory) {
-        super(job, builder, workingDirectory);
+    public NoopBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+        super(executor, job, builder, workingDirectory);
     }
 
     @Override
