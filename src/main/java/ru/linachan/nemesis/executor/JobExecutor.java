@@ -5,10 +5,7 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
 import ru.linachan.nemesis.NemesisConfig;
-import ru.linachan.nemesis.executor.builder.NoopBuilder;
-import ru.linachan.nemesis.executor.builder.PythonBuilder;
-import ru.linachan.nemesis.executor.builder.ShellBuilder;
-import ru.linachan.nemesis.executor.builder.SimpleBuilder;
+import ru.linachan.nemesis.executor.builder.*;
 import ru.linachan.nemesis.gerrit.Event;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
@@ -82,6 +79,12 @@ public class JobExecutor implements Runnable {
                     case PYTHON:
                         jobBuilder = new PythonBuilder(job, builder, tmpWorkingDirectory);
                         break;
+                    case MAVEN:
+                        jobBuilder = new MavenBuilder(job, builder, tmpWorkingDirectory);
+                        break;
+                    case PUBLISH:
+                        jobBuilder = new SSHPublisher(job, builder, tmpWorkingDirectory);
+                        break;
                     case NOOP:
                     default:
                         jobBuilder = new NoopBuilder(job, builder, tmpWorkingDirectory);
@@ -112,6 +115,7 @@ public class JobExecutor implements Runnable {
             tmpWorkingDirectory.delete();
         } catch (InterruptedException | IOException e) {
             outputLog.add(String.format("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage()));
+            success = false;
         } finally {
             running = false;
         }
