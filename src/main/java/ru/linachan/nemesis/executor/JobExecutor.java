@@ -82,6 +82,9 @@ public class JobExecutor implements Runnable {
                     case MAVEN:
                         jobBuilder = new MavenBuilder(job, builder, tmpWorkingDirectory);
                         break;
+                    case DOCKER:
+                        jobBuilder = new DockerBuilder(job, builder, tmpWorkingDirectory);
+                        break;
                     case PUBLISH:
                         jobBuilder = new SSHPublisher(job, builder, tmpWorkingDirectory);
                         break;
