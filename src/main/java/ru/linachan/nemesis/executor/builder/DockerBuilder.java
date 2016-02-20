@@ -41,11 +41,12 @@ public class DockerBuilder extends SimpleBuilder {
         ));
 
         jobScriptWriter.write(String.format(
-            "CONTAINER=$(docker run -v %s:/workspace %s /bin/bash /workspace/jobScript.sh)\n",
-            workingDirectory.getAbsolutePath(), getBuilder().params.getOrDefault("image", "ubuntu:trusty")
+            "docker run --name %s -v %s:/workspace %s /bin/bash /workspace/jobScript.sh\n",
+            workingDirectory.getName(), workingDirectory.getAbsolutePath(),
+            getBuilder().params.getOrDefault("image", "ubuntu:trusty")
         ));
 
-        jobScriptWriter.write("docker rm ${CONTAINER}\n");
+        jobScriptWriter.write(String.format("docker rm %s\n", workingDirectory.getName()));
 
         jobScriptWriter.flush();
         jobScriptWriter.close();
