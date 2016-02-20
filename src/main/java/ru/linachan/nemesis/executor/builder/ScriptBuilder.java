@@ -1,5 +1,6 @@
 package ru.linachan.nemesis.executor.builder;
 
+import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
@@ -12,8 +13,8 @@ public abstract class ScriptBuilder extends SimpleBuilder {
 
     protected File jobScript;
 
-    public ScriptBuilder(Job job, Builder builder, File workingDirectory) {
-        super(job, builder, workingDirectory);
+    public ScriptBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+        super(executor, job, builder, workingDirectory);
     }
 
     @Override

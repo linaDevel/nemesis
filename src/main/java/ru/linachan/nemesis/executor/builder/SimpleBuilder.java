@@ -1,6 +1,7 @@
 package ru.linachan.nemesis.executor.builder;
 
 import ru.linachan.nemesis.NemesisConfig;
+import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.executor.JobIOThread;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
@@ -15,6 +16,8 @@ import java.util.Map;
 
 public abstract class SimpleBuilder {
 
+    private JobExecutor executor;
+
     private Builder builder;
     private Job job;
 
@@ -27,7 +30,9 @@ public abstract class SimpleBuilder {
     private boolean started;
     private int exitCode;
 
-    public SimpleBuilder(Job job, Builder builder, File workingDirectory) {
+    public SimpleBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+        this.executor = executor;
+
         this.job = job;
         this.builder = builder;
         this.workingDirectory = workingDirectory;
@@ -115,11 +120,7 @@ public abstract class SimpleBuilder {
 
     protected abstract void postBuild();
 
-    public List<String> getOutput() {
-        return jobOutput;
-    }
-
-    public synchronized void putLine(String line, String... args) {
-        jobOutput.add(String.format(line, args));
+    public synchronized void putLine(String line, Object... args) {
+        executor.putLine(String.format(line, args));
     }
 }
