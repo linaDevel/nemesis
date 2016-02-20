@@ -1,6 +1,6 @@
 package ru.linachan.nemesis.executor.builder;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;

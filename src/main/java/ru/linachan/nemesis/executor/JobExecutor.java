@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class JobExecutor implements Runnable {
@@ -151,31 +150,12 @@ public class JobExecutor implements Runnable {
         logDir = jobLogDir;
     }
 
-    public File getLogDir() {
-        return logDir;
-    }
-
     public boolean isRunning() {
         return running;
     }
 
     public boolean isSuccess() {
         return success;
-    }
-
-    private void putLines(List<String> lines) {
-        try {
-            for (String line : lines) {
-                logFileWriter.write(String.format(
-                    " [%10.3f] %s\n",
-                    (System.currentTimeMillis() - startTime) / 1000.0,
-                    line
-                ));
-            }
-            logFileWriter.flush();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     public void putLine(String line, Object... args) {
