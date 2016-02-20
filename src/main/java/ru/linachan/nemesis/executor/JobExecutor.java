@@ -124,6 +124,8 @@ public class JobExecutor implements Runnable {
             putLine("INFO[TIME]: Job completed in %5.3f", (stopTime - startTime) / 1000.0);
 
             tmpWorkingDirectory.delete();
+            logFileWriter.flush();
+            logFileWriter.close();
         } catch (InterruptedException | IOException e) {
             putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
             success = false;
@@ -170,6 +172,7 @@ public class JobExecutor implements Runnable {
                     line
                 ));
             }
+            logFileWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -182,6 +185,7 @@ public class JobExecutor implements Runnable {
                 (System.currentTimeMillis() - startTime) / 1000.0,
                 String.format(line, args)
             ));
+            logFileWriter.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
