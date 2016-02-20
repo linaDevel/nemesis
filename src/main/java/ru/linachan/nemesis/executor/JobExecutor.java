@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class JobExecutor implements Runnable {
 
@@ -30,6 +31,8 @@ public class JobExecutor implements Runnable {
     private boolean running = true;
     private boolean success = true;
 
+    private Long startTime;
+
     public JobExecutor(Job jobDefinition) {
         job = jobDefinition;
     }
@@ -42,9 +45,10 @@ public class JobExecutor implements Runnable {
     @Override
     public void run() {
         try {
+            startTime = System.currentTimeMillis();
             File tmpWorkingDirectory = Utils.createTempDirectory(job.name + "-wd");
 
-            outputLog.add(String.format("INFO[GIT]: Cloning repository %s", environment.get("NEMESIS_PROJECT")));
+            putLine("INFO[GIT]: Cloning repository %s", environment.get("NEMESIS_PROJECT"));
 
             try (Git repo = Git.cloneRepository()
                 .setURI(String.format(
@@ -60,10 +64,10 @@ public class JobExecutor implements Runnable {
                 repo.fetch().setRefSpecs(new RefSpec(environment.get("NEMESIS_REF"))).call();
                 repo.checkout().setName("FETCH_HEAD").call();
 
-                outputLog.add(String.format(
+                putLine(
                     "INFO[GIT]: Checking out %s",
                     repo.log().setMaxCount(1).call().iterator().next().getName()
-                ));
+                );
 
             } catch (GitAPIException e) {
                 e.printStackTrace();
@@ -74,50 +78,52 @@ public class JobExecutor implements Runnable {
 
                 switch (builder.type) {
                     case SHELL:
-                        jobBuilder = new ShellBuilder(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new ShellBuilder(this, job, builder, tmpWorkingDirectory);
                         break;
                     case PYTHON:
-                        jobBuilder = new PythonBuilder(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new PythonBuilder(this, job, builder, tmpWorkingDirectory);
                         break;
                     case MAVEN:
-                        jobBuilder = new MavenBuilder(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new MavenBuilder(this, job, builder, tmpWorkingDirectory);
                         break;
                     case DOCKER:
-                        jobBuilder = new DockerBuilder(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new DockerBuilder(this, job, builder, tmpWorkingDirectory);
                         break;
                     case PUBLISH:
-                        jobBuilder = new SSHPublisher(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new SSHPublisher(this, job, builder, tmpWorkingDirectory);
                         break;
                     case NOOP:
                     default:
-                        jobBuilder = new NoopBuilder(job, builder, tmpWorkingDirectory);
+                        jobBuilder = new NoopBuilder(this, job, builder, tmpWorkingDirectory);
                 }
 
-                outputLog.add(String.format("INFO[%s]: Starting builder", builder.type));
+                putLine("INFO[%s]: Starting builder", builder.type);
 
                 jobBuilder.setEnvironment(environment);
                 int exitCode = jobBuilder.execute();
 
-                outputLog.addAll(jobBuilder.getOutput());
-                outputLog.add(String.format("INFO[%s]: Builder exited with code %d", builder.type, exitCode));
+                putLine("INFO[%s]: Builder exited with code %d", builder.type, exitCode);
 
                 success = success && (exitCode == 0);
 
                 if (!success) {
-                    outputLog.add(String.format("ERROR[%s]: Interrupting build", builder.type));
+                    putLine(String.format("ERROR[%s]: Interrupting build", builder.type));
                     break;
                 }
             }
 
             File artifactsDir = new File(tmpWorkingDirectory, "artifacts");
             if (artifactsDir.exists()) {
-                outputLog.add("INFO[POST_BUILD]: Copying artifacts");
+                putLine("INFO[POST_BUILD]: Copying artifacts");
                 FileUtils.copyDirectory(artifactsDir, new File(logDir, "artifacts"));
             }
 
+            Long stopTime = System.currentTimeMillis();
+            putLine("INFO[TIME]: Job completed in %5.3f", (stopTime - startTime) / 1000.0);
+
             tmpWorkingDirectory.delete();
         } catch (InterruptedException | IOException e) {
-            outputLog.add(String.format("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage()));
+            putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
             success = false;
         } finally {
             running = false;
@@ -155,5 +161,21 @@ public class JobExecutor implements Runnable {
 
     public List<String> getOutput() {
         return outputLog;
+    }
+
+    private void putLines(List<String> lines) {
+        outputLog.addAll(lines.stream().map(line -> String.format(
+            " [%10.3f] %s",
+            (System.currentTimeMillis() - startTime) / 1000.0,
+            line
+        )).collect(Collectors.toList()));
+    }
+
+    public void putLine(String line, Object... args) {
+        outputLog.add(String.format(
+            " [%10.3f] %s",
+            (System.currentTimeMillis() - startTime) / 1000.0,
+            String.format(line, args)
+        ));
     }
 }
