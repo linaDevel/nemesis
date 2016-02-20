@@ -9,9 +9,7 @@ import ru.linachan.nemesis.layout.Job;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public abstract class SimpleBuilder {
@@ -23,8 +21,6 @@ public abstract class SimpleBuilder {
 
     protected File workingDirectory;
     private Map<String, String> environment = new HashMap<>();
-
-    private List<String> jobOutput = new ArrayList<>();
 
     private boolean running;
     private boolean started;
