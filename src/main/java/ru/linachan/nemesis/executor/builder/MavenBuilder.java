@@ -1,6 +1,7 @@
 package ru.linachan.nemesis.executor.builder;
 
 import org.apache.commons.lang.StringUtils;
+import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
@@ -15,8 +16,8 @@ public class MavenBuilder extends SimpleBuilder {
 
     private File jobScript;
 
-    public MavenBuilder(Job job, Builder builder, File workingDirectory) {
-        super(job, builder, workingDirectory);
+    public MavenBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+        super(executor, job, builder, workingDirectory);
     }
 
     @Override
