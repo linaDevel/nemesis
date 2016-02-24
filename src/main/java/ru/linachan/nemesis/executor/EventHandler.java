@@ -2,7 +2,8 @@ package ru.linachan.nemesis.executor;
 
 import ru.linachan.nemesis.NemesisCore;
 import ru.linachan.nemesis.gerrit.Event;
-import ru.linachan.nemesis.layout.*;
+import ru.linachan.nemesis.layout.Job;
+import ru.linachan.nemesis.layout.Score;
 import ru.linachan.nemesis.utils.Utils;
 
 import java.util.List;
@@ -21,11 +22,6 @@ public class EventHandler implements Runnable {
     public EventHandler(NemesisCore serviceCore, Event incomingEvent) {
         service = serviceCore;
         event = incomingEvent;
-    }
-
-    public void execute() {
-        Thread executionThread = new Thread(this);
-        executionThread.start();
     }
 
     @Override
@@ -108,7 +104,7 @@ public class EventHandler implements Runnable {
                                 .map(jobName -> service.getJob(jobName))
                                 .collect(Collectors.toList());
 
-                            new PipeLineExecutor(service, jobs, pipeLine, event).execute();
+                            service.executeThread(new PipeLineExecutor(service, jobs, pipeLine, event));
                         }
                     });
             } else {

@@ -59,7 +59,7 @@ public class NemesisCore {
         layoutWatchDog = new LayoutWatchDog();
         jobWatchDog = new JobWatchDog();
 
-        executorService = Executors.newFixedThreadPool(NemesisConfig.getConcurrentJobs());
+        executorService = Executors.newFixedThreadPool(NemesisConfig.getConcurrentJobs() * 3);
 
         eventListener = new EventListener(this);
         webServer = new NemesisWeb();
@@ -80,10 +80,10 @@ public class NemesisCore {
     }
 
     private void run() throws Exception {
-        layoutWatchDog.start();
-        jobWatchDog.start();
+        executeThread(layoutWatchDog);
+        executeThread(jobWatchDog);
 
-        eventListener.start();
+        executeThread(eventListener);
         webServer.start();
 
         while (isRunning()) {
@@ -94,7 +94,7 @@ public class NemesisCore {
     }
 
     public void handleEvent(Event gerritEvent) {
-        new EventHandler(this, gerritEvent).execute();
+        executeThread(new EventHandler(this, gerritEvent));
     }
 
     public boolean isRunning() {
