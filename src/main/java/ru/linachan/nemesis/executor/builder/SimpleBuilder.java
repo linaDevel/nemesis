@@ -1,6 +1,7 @@
 package ru.linachan.nemesis.executor.builder;
 
 import ru.linachan.nemesis.NemesisConfig;
+import ru.linachan.nemesis.executor.JobBuilder;
 import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.executor.JobIOThread;
 import ru.linachan.nemesis.layout.Builder;

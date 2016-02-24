@@ -1,6 +1,5 @@
-package ru.linachan.nemesis.executor.builder;
+package ru.linachan.nemesis.executor;
 
-import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.layout.Job;
 
 import java.io.File;
