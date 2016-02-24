@@ -40,6 +40,11 @@ public class NemesisConfig {
         return System.getenv("NEMESIS_GERRIT_KEYPASS");
     }
 
+    public static int getConcurrentJobs() {
+        String concurrentJobs = System.getenv("NEMESIS_CONCURRENT_JOBS");
+        return (concurrentJobs != null) ? Integer.valueOf(concurrentJobs) : 5;
+    }
+
     public static Path getRoot() {
         String path = System.getenv("NEMESIS_ROOT");
         return Paths.get((path != null) ? path : "./");

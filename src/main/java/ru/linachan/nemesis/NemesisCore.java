@@ -5,7 +5,9 @@ import ru.linachan.nemesis.gerrit.ChangeRequest;
 import ru.linachan.nemesis.gerrit.Event;
 import ru.linachan.nemesis.gerrit.EventListener;
 import ru.linachan.nemesis.gerrit.PatchSet;
-import ru.linachan.nemesis.layout.*;
+import ru.linachan.nemesis.layout.Job;
+import ru.linachan.nemesis.layout.Layout;
+import ru.linachan.nemesis.layout.Score;
 import ru.linachan.nemesis.ssh.SSHAuth;
 import ru.linachan.nemesis.ssh.SSHConnection;
 import ru.linachan.nemesis.utils.ShutdownHook;
@@ -13,8 +15,14 @@ import ru.linachan.nemesis.watchdog.JobWatchDog;
 import ru.linachan.nemesis.watchdog.LayoutWatchDog;
 import ru.linachan.nemesis.web.NemesisWeb;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public class NemesisCore {
 
@@ -29,6 +37,8 @@ public class NemesisCore {
 
     private LayoutWatchDog layoutWatchDog;
     private JobWatchDog jobWatchDog;
+
+    private ExecutorService executorService;
 
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
@@ -48,6 +58,8 @@ public class NemesisCore {
 
         layoutWatchDog = new LayoutWatchDog();
         jobWatchDog = new JobWatchDog();
+
+        executorService = Executors.newFixedThreadPool(NemesisConfig.getConcurrentJobs());
 
         eventListener = new EventListener(this);
         webServer = new NemesisWeb();
@@ -99,6 +111,10 @@ public class NemesisCore {
 
     public Job getJob(String name) {
         return jobWatchDog.getJob(name);
+    }
+
+    public Future executeThread(Runnable thread) {
+        return executorService.submit(thread);
     }
 
     public void review(ChangeRequest change, PatchSet patchSet, String message, Score... scores) throws IOException {

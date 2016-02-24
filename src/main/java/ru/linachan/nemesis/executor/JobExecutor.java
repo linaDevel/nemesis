@@ -36,11 +36,6 @@ public class JobExecutor implements Runnable {
         job = jobDefinition;
     }
 
-    public void execute() {
-        Thread executionThread = new Thread(this);
-        executionThread.start();
-    }
-
     @Override
     public void run() {
         try {
