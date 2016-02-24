@@ -71,32 +71,34 @@ public class JobExecutor implements Runnable {
             }
 
             for (Builder builder: job.builders) {
-                SimpleBuilder jobBuilder;
+                JobBuilder jobBuilder;
 
                 switch (builder.type) {
                     case SHELL:
-                        jobBuilder = new ShellBuilder(this, job, builder, workingDirectory);
+                        jobBuilder = new ShellBuilder();
                         break;
                     case PYTHON:
-                        jobBuilder = new PythonBuilder(this, job, builder, workingDirectory);
+                        jobBuilder = new PythonBuilder();
                         break;
                     case MAVEN:
-                        jobBuilder = new MavenBuilder(this, job, builder, workingDirectory);
+                        jobBuilder = new MavenBuilder();
                         break;
                     case DOCKER:
-                        jobBuilder = new DockerBuilder(this, job, builder, workingDirectory);
+                        jobBuilder = new DockerBuilder();
                         break;
                     case PUBLISH:
-                        jobBuilder = new SSHPublisher(this, job, builder, workingDirectory);
+                        jobBuilder = new SSHPublisher();
                         break;
                     case NOOP:
                     default:
-                        jobBuilder = new NoopBuilder(this, job, builder, workingDirectory);
+                        jobBuilder = new NoopBuilder();
                 }
+
+                jobBuilder.setUp(this, job, builder, workingDirectory);
+                jobBuilder.setEnvironment(environment);
 
                 putLine("INFO[%s]: Starting builder", builder.type);
 
-                jobBuilder.setEnvironment(environment);
                 int exitCode = jobBuilder.execute();
 
                 putLine("INFO[%s]: Builder exited with code %d", builder.type, exitCode);

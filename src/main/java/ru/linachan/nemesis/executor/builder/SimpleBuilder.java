@@ -12,7 +12,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SimpleBuilder {
+public abstract class SimpleBuilder implements JobBuilder {
 
     private JobExecutor executor;
 
@@ -26,7 +26,8 @@ public abstract class SimpleBuilder {
     private boolean started;
     private int exitCode;
 
-    public SimpleBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+    @Override
+    public void setUp(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
         this.executor = executor;
 
         this.job = job;
@@ -59,14 +60,17 @@ public abstract class SimpleBuilder {
         return processBuilder;
     }
 
+    @Override
     public void setEnvironment(Map<String, String> newEnvironment) {
         environment.putAll(newEnvironment);
     }
 
+    @Override
     public void setEnvironment(String key, String value) {
         environment.put(key, value);
     }
 
+    @Override
     public Integer execute() throws InterruptedException, IOException {
         preBuild();
 
@@ -106,6 +110,7 @@ public abstract class SimpleBuilder {
         return exitCode;
     }
 
+    @Override
     public boolean isRunning() {
         return running || !started;
     }

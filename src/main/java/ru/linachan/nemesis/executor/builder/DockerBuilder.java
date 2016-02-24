@@ -1,8 +1,5 @@
 package ru.linachan.nemesis.executor.builder;
 
-import ru.linachan.nemesis.executor.JobExecutor;
-import ru.linachan.nemesis.layout.Builder;
-import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
@@ -13,10 +10,6 @@ public class DockerBuilder extends SimpleBuilder {
 
     private File jobScript;
     private File jobShellScript;
-
-    public DockerBuilder(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
-        super(executor, job, builder, workingDirectory);
-    }
 
     @Override
     protected void preBuild() throws IOException {
