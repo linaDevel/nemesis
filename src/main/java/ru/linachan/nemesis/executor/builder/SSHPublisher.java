@@ -1,8 +1,5 @@
 package ru.linachan.nemesis.executor.builder;
 
-import ru.linachan.nemesis.executor.JobExecutor;
-import ru.linachan.nemesis.layout.Builder;
-import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
@@ -12,10 +9,6 @@ import java.io.IOException;
 public class SSHPublisher extends SimpleBuilder {
 
     private File jobScript;
-
-    public SSHPublisher(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
-        super(executor, job, builder, workingDirectory);
-    }
 
     @Override
     protected void preBuild() throws IOException {
