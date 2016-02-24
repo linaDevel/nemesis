@@ -27,8 +27,6 @@ public class MavenBuilder extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
-        jobScriptWriter.write("#!/bin/bash\n");
-        jobScriptWriter.write("set -xe\n");
         jobScriptWriter.write("pushd ${WORKSPACE}/source\n");
 
         jobScriptWriter.write(String.format(
@@ -49,7 +47,7 @@ public class MavenBuilder extends SimpleBuilder {
 
     @Override
     protected ProcessBuilder build() {
-        return getProcessBuilder("/bin/bash", jobScript.getPath());
+        return getProcessBuilder("/bin/bash", "-xe", jobScript.getPath());
     }
 
     @Override

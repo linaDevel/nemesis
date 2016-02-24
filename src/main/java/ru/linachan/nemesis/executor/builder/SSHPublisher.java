@@ -24,9 +24,6 @@ public class SSHPublisher extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
-        jobScriptWriter.write("#!/bin/bash\n");
-        jobScriptWriter.write("set -xe\n");
-
         jobScriptWriter.write(String.format(
             "scp -i ${SSH_KEY} ${WORKSPACE}/artifacts/%s %s:%s\n",
             getBuilder().params.get("sourcePath"),
@@ -40,7 +37,7 @@ public class SSHPublisher extends SimpleBuilder {
 
     @Override
     protected ProcessBuilder build() {
-        return getProcessBuilder("/bin/bash", jobScript.getPath());
+        return getProcessBuilder("/bin/bash", "-xe", jobScript.getPath());
     }
 
     @Override
