@@ -45,7 +45,7 @@ public class PipeLineExecutor implements Runnable {
                 e.printStackTrace();
             }
 
-            executor.execute();
+            service.executeThread(executor);
 
             jobExecutors.add(executor);
         });
