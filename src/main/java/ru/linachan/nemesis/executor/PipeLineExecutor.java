@@ -25,11 +25,6 @@ public class PipeLineExecutor implements Runnable {
         event = eventData;
     }
 
-    public void execute() {
-        Thread executionThread = new Thread(this);
-        executionThread.start();
-    }
-
     @Override
     public void run() {
         List<JobExecutor> jobExecutors = new ArrayList<>();
