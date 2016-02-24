@@ -34,15 +34,12 @@ public class DockerBuilder extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
-        jobScriptWriter.write("#!/bin/bash\n");
-        jobScriptWriter.write("set -xe\n");
-
         jobScriptWriter.write(String.format(
             "docker pull %s\n", getBuilder().params.getOrDefault("image", "ubuntu:trusty")
         ));
 
         jobScriptWriter.write(String.format(
-            "docker run --rm --name %s -v %s:/workspace %s /bin/bash /workspace/jobScript.sh\n",
+            "docker run --rm --name %s -v %s:/workspace %s /bin/bash -xe /workspace/jobScript.sh\n",
             jobScript.getName(), workingDirectory.getAbsolutePath(),
             getBuilder().params.getOrDefault("image", "ubuntu:trusty")
         ));
@@ -53,7 +50,7 @@ public class DockerBuilder extends SimpleBuilder {
 
     @Override
     protected ProcessBuilder build() {
-        return getProcessBuilder("/bin/bash", jobScript.getPath());
+        return getProcessBuilder("/bin/bash", "-xe", jobScript.getPath());
     }
 
     @Override

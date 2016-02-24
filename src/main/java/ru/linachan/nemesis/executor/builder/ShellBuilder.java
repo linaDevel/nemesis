@@ -14,6 +14,6 @@ public class ShellBuilder extends ScriptBuilder {
 
     @Override
     protected ProcessBuilder build() {
-        return getProcessBuilder("/bin/bash", jobScript.getPath());
+        return getProcessBuilder("/bin/bash", "-xe", jobScript.getPath());
     }
 }
