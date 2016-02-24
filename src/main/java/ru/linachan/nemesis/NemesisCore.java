@@ -59,7 +59,7 @@ public class NemesisCore {
         layoutWatchDog = new LayoutWatchDog();
         jobWatchDog = new JobWatchDog();
 
-        executorService = Executors.newFixedThreadPool(NemesisConfig.getConcurrentJobs() * 3);
+        executorService = Executors.newCachedThreadPool();
 
         eventListener = new EventListener(this);
         webServer = new NemesisWeb();
