@@ -50,9 +50,13 @@ public class JobWatchDog extends FileWatchDog {
 
         for (File jobFile: jobsDir.listFiles()) {
             if (!jobFile.isDirectory()&&jobFile.getName().endsWith(".yaml")) {
-                JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
-                for (Job job: jobDefinition.jobs) {
-                    jobData.put(job.name, job);
+                try {
+                    JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
+                    for (Job job : jobDefinition.jobs) {
+                        jobData.put(job.name, job);
+                    }
+                } catch (Exception e) {
+                    System.out.println(String.format("Unable to load %s: %s", jobFile.getName(), e.getMessage()));
                 }
             }
         }
