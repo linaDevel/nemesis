@@ -24,12 +24,12 @@ public class MavenBuilder extends SimpleBuilder {
 
         jobScriptWriter.write(String.format(
             "mvn %s\n",
-            StringUtils.join(((List<String>) getBuilder().params.get("target")).toArray(), " ")
+            StringUtils.join(((List<String>) getBuilder().get("target")).toArray(), " ")
         ));
 
         jobScriptWriter.write("popd\n");
 
-        if ((Boolean) getBuilder().params.get("copyJar")) {
+        if ((Boolean) getBuilder().get("copyJar")) {
             jobScriptWriter.write("mkdir -p ${WORKSPACE}/artifacts\n");
             jobScriptWriter.write("cp ${WORKSPACE}/source/target/*.jar ${WORKSPACE}/artifacts/\n");
         }

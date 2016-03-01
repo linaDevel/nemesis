@@ -20,7 +20,7 @@ public class DockerBuilder extends SimpleBuilder {
 
         FileWriter jobShellScriptWriter = new FileWriter(jobShellScript);
 
-        jobShellScriptWriter.write((String) getBuilder().params.get("script"));
+        jobShellScriptWriter.write((String) getBuilder().get("script"));
 
         jobShellScriptWriter.flush();
         jobShellScriptWriter.close();
@@ -28,13 +28,13 @@ public class DockerBuilder extends SimpleBuilder {
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
         jobScriptWriter.write(String.format(
-            "docker pull %s\n", getBuilder().params.getOrDefault("image", "ubuntu:trusty")
+            "docker pull %s\n", getBuilder().getOrDefault("image", "ubuntu:trusty")
         ));
 
         jobScriptWriter.write(String.format(
             "docker run --rm --name %s -v %s:/workspace %s /bin/bash -xe /workspace/jobScript.sh\n",
             jobScript.getName(), workingDirectory.getAbsolutePath(),
-            getBuilder().params.getOrDefault("image", "ubuntu:trusty")
+            getBuilder().getOrDefault("image", "ubuntu:trusty")
         ));
 
         jobScriptWriter.flush();
