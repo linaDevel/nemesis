@@ -44,7 +44,11 @@ public class LayoutWatchDog extends FileWatchDog {
         if (layoutFile.exists()) {
             System.out.println("Reading Nemesis layout...");
             Yaml layoutParser = new Yaml(new Constructor(Layout.class));
-            layoutData = (Layout) layoutParser.load(new FileReader(layoutFile));
+            try {
+                layoutData = (Layout) layoutParser.load(new FileReader(layoutFile));
+            } catch(Exception e) {
+                System.out.println(String.format("Unable to load layout file: %s", e.getMessage()));
+            }
         }
     }
 
