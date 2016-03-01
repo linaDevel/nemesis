@@ -4,7 +4,6 @@ import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.executor.JobBuilder;
 import ru.linachan.nemesis.executor.JobExecutor;
 import ru.linachan.nemesis.executor.JobIOThread;
-import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 
 import java.io.File;
@@ -17,7 +16,7 @@ public abstract class SimpleBuilder implements JobBuilder {
 
     private JobExecutor executor;
 
-    private Builder builder;
+    private Map<String, Object> builder;
     private Job job;
 
     protected File workingDirectory;
@@ -28,7 +27,7 @@ public abstract class SimpleBuilder implements JobBuilder {
     private int exitCode;
 
     @Override
-    public void setUp(JobExecutor executor, Job job, Builder builder, File workingDirectory) {
+    public void setUp(JobExecutor executor, Job job, Map<String, Object> builder, File workingDirectory) {
         this.executor = executor;
 
         this.job = job;
@@ -40,7 +39,7 @@ public abstract class SimpleBuilder implements JobBuilder {
         return job;
     }
 
-    protected Builder getBuilder() {
+    protected Map<String, Object> getBuilder() {
         return builder;
     }
 

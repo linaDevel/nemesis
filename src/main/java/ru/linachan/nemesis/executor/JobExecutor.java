@@ -5,9 +5,8 @@ import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.RefSpec;
 import ru.linachan.nemesis.NemesisConfig;
-import ru.linachan.nemesis.executor.builder.*;
+import ru.linachan.nemesis.NemesisCore;
 import ru.linachan.nemesis.gerrit.Event;
-import ru.linachan.nemesis.layout.Builder;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
@@ -19,6 +18,7 @@ import java.util.Map;
 
 public class JobExecutor implements Runnable {
 
+    private NemesisCore service;
     private Job job;
 
     private Map<String, String> environment = new HashMap<>();
@@ -32,8 +32,29 @@ public class JobExecutor implements Runnable {
     private Long startTime;
     private FileWriter logFileWriter;
 
-    public JobExecutor(Job jobDefinition) {
+    public JobExecutor(NemesisCore serviceObject, Job jobDefinition) {
+        service = serviceObject;
         job = jobDefinition;
+    }
+
+    private JobBuilder getBuilder(String builderName) throws IllegalAccessException, InstantiationException {
+        for (Class<? extends JobBuilder> jobBuilderClass: service.getDiscoveryHelper().getSubTypesOf(JobBuilder.class)) {
+            if (jobBuilderClass.getSimpleName().equals(builderName)) {
+                return jobBuilderClass.newInstance();
+            }
+        }
+
+        return null;
+    }
+
+    private JobPublisher getPublisher(String publisherName) throws IllegalAccessException, InstantiationException {
+        for (Class<? extends JobPublisher> jobPublisherClass: service.getDiscoveryHelper().getSubTypesOf(JobPublisher.class)) {
+            if (jobPublisherClass.getSimpleName().equals(publisherName)) {
+                return jobPublisherClass.newInstance();
+            }
+        }
+
+        return null;
     }
 
     @Override
@@ -70,44 +91,39 @@ public class JobExecutor implements Runnable {
                 e.printStackTrace();
             }
 
-            for (Builder builder: job.builders) {
-                JobBuilder jobBuilder;
+            for (String builder: job.builders.keySet()) {
+                JobBuilder jobBuilder = getBuilder(builder);
 
-                switch (builder.type) {
-                    case SHELL:
-                        jobBuilder = new ShellBuilder();
+                if (jobBuilder != null) {
+                    jobBuilder.setUp(this, job, job.builders.get(builder), workingDirectory);
+                    jobBuilder.setEnvironment(environment);
+
+                    putLine("INFO[%s]: Starting builder", builder);
+
+                    int exitCode = jobBuilder.execute();
+
+                    putLine("INFO[%s]: Builder exited with code %d", builder, exitCode);
+
+                    success = success && (exitCode == 0);
+
+                    if (!success) {
+                        putLine("ERROR[%s]: Interrupting build", builder);
                         break;
-                    case PYTHON:
-                        jobBuilder = new PythonBuilder();
-                        break;
-                    case MAVEN:
-                        jobBuilder = new MavenBuilder();
-                        break;
-                    case DOCKER:
-                        jobBuilder = new DockerBuilder();
-                        break;
-                    case PUBLISH:
-                        jobBuilder = new SSHPublisher();
-                        break;
-                    case NOOP:
-                    default:
-                        jobBuilder = new NoopBuilder();
-                }
-
-                jobBuilder.setUp(this, job, builder, workingDirectory);
-                jobBuilder.setEnvironment(environment);
-
-                putLine("INFO[%s]: Starting builder", builder.type);
-
-                int exitCode = jobBuilder.execute();
-
-                putLine("INFO[%s]: Builder exited with code %d", builder.type, exitCode);
-
-                success = success && (exitCode == 0);
-
-                if (!success) {
-                    putLine(String.format("ERROR[%s]: Interrupting build", builder.type));
+                    }
+                } else {
+                    putLine("ERROR[%s]: Builder not found", builder);
+                    success = false;
                     break;
+                }
+            }
+
+            for (String publisher: job.publishers.keySet()) {
+                JobPublisher jobPublisher = getPublisher(publisher);
+
+                if (jobPublisher != null) {
+                    jobPublisher.publish(this, job, job.publishers.get(publisher), environment);
+                } else {
+                    putLine("ERROR[%s]: Publisher not found", publisher);
                 }
             }
 
@@ -122,7 +138,7 @@ public class JobExecutor implements Runnable {
 
             logFileWriter.flush();
             logFileWriter.close();
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException | IOException | InstantiationException | IllegalAccessException e) {
             try {
                 putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
             } catch (IOException e1) {
@@ -145,6 +161,9 @@ public class JobExecutor implements Runnable {
             environment.put("NEMESIS_PROJECT", event.getChangeRequest().getProject());
             environment.put("NEMESIS_BRANCH", event.getChangeRequest().getBranch());
             environment.put("NEMESIS_REF", event.getPatchSet().getRef());
+
+            environment.put("NEMESIS_PATCHSET_ID", String.valueOf(event.getPatchSet().getPatchSetNumber()));
+            environment.put("NEMESIS_CHANGE_ID", String.valueOf(event.getChangeRequest().getChangeNumber()));
         }
     }
 

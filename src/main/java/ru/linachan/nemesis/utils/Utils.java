@@ -1,16 +1,16 @@
 package ru.linachan.nemesis.utils;
 
 import org.apache.commons.io.FileUtils;
+import org.json.simple.JSONObject;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.gerrit.Approval;
 import ru.linachan.nemesis.gerrit.Event;
-import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.layout.Score;
 import ru.linachan.nemesis.layout.ScoreType;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
+import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class Utils {
 
@@ -94,12 +94,32 @@ public class Utils {
         return score;
     }
 
-    public static Job noopJob() {
-        Job noopJob = new Job();
+    public static String doPOST(String url, JSONObject data) throws IOException {
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setDoOutput(true);
+        con.setDoInput(true);
+        con.setRequestProperty("Content-Type", "application/json");
+        con.setRequestProperty("Accept", "application/json");
+        con.setRequestMethod("POST");
 
-        noopJob.name = "noop";
-        noopJob.builders = new ArrayList<>();
+        OutputStreamWriter wr = new OutputStreamWriter(con.getOutputStream());
+        wr.write(data.toJSONString());
+        wr.flush();
 
-        return noopJob;
+        StringBuilder sb = new StringBuilder();
+        int HttpResult = con.getResponseCode();
+
+        if (HttpResult == HttpURLConnection.HTTP_OK){
+            BufferedReader br = new BufferedReader(new InputStreamReader(con.getInputStream(), "utf-8"));
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+
+            br.close();
+
+        }
+
+        return sb.toString();
     }
 }

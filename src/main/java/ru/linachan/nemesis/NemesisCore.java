@@ -1,5 +1,8 @@
 package ru.linachan.nemesis;
 
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
+import org.reflections.util.ClasspathHelper;
 import ru.linachan.nemesis.executor.EventHandler;
 import ru.linachan.nemesis.gerrit.ChangeRequest;
 import ru.linachan.nemesis.gerrit.Event;
@@ -38,10 +41,16 @@ public class NemesisCore {
     private LayoutWatchDog layoutWatchDog;
     private JobWatchDog jobWatchDog;
 
+    private Reflections discoveryHelper;
     private ExecutorService executorService;
 
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
+
+        discoveryHelper = new Reflections(
+                ClasspathHelper.forPackage("ru.linachan"),
+                new SubTypesScanner()
+        );
 
         serverHost = NemesisConfig.getGerritHost();
         serverPort = NemesisConfig.getGerritPort();
@@ -111,6 +120,10 @@ public class NemesisCore {
 
     public Job getJob(String name) {
         return jobWatchDog.getJob(name);
+    }
+
+    public Reflections getDiscoveryHelper() {
+        return discoveryHelper;
     }
 
     public Future executeThread(Runnable thread) {
