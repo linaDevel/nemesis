@@ -30,7 +30,7 @@ public class PipeLineExecutor implements Runnable {
         List<JobExecutor> jobExecutors = new ArrayList<>();
 
         jobs.stream().filter(job -> job != null).forEach(job -> {
-            JobExecutor executor = new JobExecutor(job);
+            JobExecutor executor = new JobExecutor(service, job);
 
             executor.setEventData(event);
 

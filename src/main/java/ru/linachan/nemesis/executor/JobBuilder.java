@@ -8,7 +8,7 @@ import java.util.Map;
 
 public interface JobBuilder {
 
-    void setUp(JobExecutor executor, Job job, ru.linachan.nemesis.layout.Builder builder, File workingDirectory);
+    void setUp(JobExecutor executor, Job job, Map<String, Object> builder, File workingDirectory);
 
     Integer execute() throws InterruptedException, IOException;
 
