@@ -164,6 +164,8 @@ public class JobExecutor implements Runnable {
 
             environment.put("NEMESIS_PATCHSET_ID", String.valueOf(event.getPatchSet().getPatchSetNumber()));
             environment.put("NEMESIS_CHANGE_ID", String.valueOf(event.getChangeRequest().getChangeNumber()));
+
+            environment.put("HOME", NemesisConfig.getRoot().toString());
         }
     }
 
