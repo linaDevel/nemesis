@@ -4,5 +4,6 @@ public enum ScoreType {
     VERIFIED,
     SUBMIT,
     CODE_REVIEW,
-    WORKFLOW
+    WORKFLOW,
+    QUALITY_ASSURANCE
 }

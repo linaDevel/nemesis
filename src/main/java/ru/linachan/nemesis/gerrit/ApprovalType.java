@@ -2,6 +2,7 @@ package ru.linachan.nemesis.gerrit;
 
 public enum ApprovalType {
     CODE_REVIEW("Code-Review"),
+    QUALITY_ASSURANCE("Quality-Assurance"),
     VERIFIED("Verified"),
     WORKFLOW("Workflow");
 

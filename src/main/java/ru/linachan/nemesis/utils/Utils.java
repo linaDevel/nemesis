@@ -88,6 +88,9 @@ public class Utils {
             case WORKFLOW:
                 score.approval = ScoreType.WORKFLOW;
                 break;
+            case QUALITY_ASSURANCE:
+                score.approval = ScoreType.QUALITY_ASSURANCE;
+                break;
         }
         score.score = approval.getValue();
 
