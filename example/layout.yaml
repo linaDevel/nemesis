@@ -1,0 +1,23 @@
+---
+pipelines:
+  - name: check
+    triggers:
+      - event: DRAFT_PUBLISHED
+      - event: PATCHSET_CREATED
+      - event: CHANGE_RESTORED
+      - event: COMMENT_ADDED
+        commentFilter: (?i)^(Patch Set [0-9]+:)?( [\w\\+-]*)*(\n\n)?\s*(recheck|reverify)
+    onStart:
+      - approval: VERIFIED
+        score: 0
+    onSuccess:
+      - approval: VERIFIED
+        score: 1
+    onFailure:
+      - approval: VERIFIED
+        score: -1
+
+projects:
+  - name: ^testGroup/testRepo$
+    check:
+      - gate-test

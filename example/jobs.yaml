@@ -1,0 +1,9 @@
+jobs:
+  - name: gate-test
+    builders:
+     MavenBuilder:
+      target:
+       - clean
+       - compile
+       - assembly:single
+      copyJar: true
