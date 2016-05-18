@@ -151,6 +151,9 @@ public class NemesisCore {
                 case VERIFIED:
                     reviewCommand += String.format(" --verified %d", score.score);
                     break;
+                case QUALITY_ASSURANCE:
+                    reviewCommand += String.format(" --quality-assurance %d", score.score);
+                    break;
                 case CODE_REVIEW:
                     reviewCommand += String.format(" --code-review %d", score.score);
                     break;
