@@ -29,6 +29,8 @@ public class SCPPublisher extends SimplePublisher {
             SSHAuth auth = (keyPass != null) ? new SSHAuth(keyFile, remoteUser, keyPass) : new SSHAuth(keyFile, remoteUser);
             SSHConnection connection = new SSHConnection(remoteHost, remotePort, null, auth);
 
+            connection.executeCommand(String.format("mkdir -p %s", remotePath));
+
             String command = String.format("scp -t %s", remotePath);
             Channel channel = connection.executeCommandChannel(command);
 
