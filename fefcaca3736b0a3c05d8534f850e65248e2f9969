@@ -1,0 +1,10 @@
+Quality-Assurance+1: Nemesis CI <nemesis@lina-infra.ru>
+Verified+1: Nemesis CI <nemesis@lina-infra.ru>
+Code-Review+2: Alexey Deryugin <aderyugin@mirantis.com>
+Verified+2: Alexey Deryugin <aderyugin@mirantis.com>
+Workflow+1: Alexey Deryugin <aderyugin@mirantis.com>
+Submitted-by: Alexey Deryugin <aderyugin@mirantis.com>
+Submitted-at: Thu, 19 May 2016 17:29:21 +0300
+Reviewed-on: https://review.lina-infra.ru/147
+Project: linaDevel/nemesis
+Branch: refs/heads/master
