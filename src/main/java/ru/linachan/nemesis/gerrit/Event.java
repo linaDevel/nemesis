@@ -62,16 +62,26 @@ public class Event {
                 case COMMENT_ADDED:
                     author = new Author((JSONObject) eventObject.get("author"));
                     comment = (String) eventObject.get("comment");
+                    approvals = new ArrayList<>();
+
+                    JSONArray approvalsData = (JSONArray) eventObject.get("approvals");
+
+                    if (approvalsData != null) {
+                        approvals.addAll(
+                            (Collection<? extends Approval>) approvalsData.stream()
+                                .map(approval -> new Approval((JSONObject) approval))
+                                .collect(Collectors.toList())
+                        );
+                    }
 
                     try {
                         JSONObject changeRequestData = serviceCore.query(changeRequest.getChangeId());
                         JSONObject currentPatchSetData = (JSONObject) changeRequestData.get("currentPatchSet");
-                        JSONArray approvalsData = (JSONArray) currentPatchSetData.get("approvals");
+                        JSONArray presentApprovalsData = (JSONArray) currentPatchSetData.get("approvals");
 
-                        if (approvalsData != null) {
-                            approvals = new ArrayList<>();
+                        if (presentApprovalsData != null) {
                             approvals.addAll(
-                                (Collection<? extends Approval>) approvalsData.stream()
+                                (Collection<? extends Approval>) presentApprovalsData.stream()
                                     .map(approval -> new Approval((JSONObject) approval))
                                     .collect(Collectors.toList())
                             );
