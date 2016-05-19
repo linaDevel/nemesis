@@ -89,6 +89,8 @@ public class Event {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+
+                    System.out.println(approvals);
                     break;
                 case DRAFT_PUBLISHED:
                     author = new Author((JSONObject) eventObject.get("uploader"));
