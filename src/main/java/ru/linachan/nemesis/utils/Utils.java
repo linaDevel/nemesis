@@ -2,15 +2,18 @@ package ru.linachan.nemesis.utils;
 
 import org.apache.commons.io.FileUtils;
 import org.json.simple.JSONObject;
+import org.yaml.snakeyaml.Yaml;
+import org.yaml.snakeyaml.constructor.Constructor;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.gerrit.Approval;
 import ru.linachan.nemesis.gerrit.Event;
-import ru.linachan.nemesis.layout.Score;
-import ru.linachan.nemesis.layout.ScoreType;
+import ru.linachan.nemesis.layout.*;
 
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Utils {
 
@@ -124,5 +127,38 @@ public class Utils {
         }
 
         return sb.toString();
+    }
+
+    public static Map<String, Job> readJobConfiguration(File jobsDir) throws FileNotFoundException {
+        Map<String, Job> jobData = new HashMap<>();
+
+        Yaml jobParser = new Yaml(new Constructor(JobDefinition.class));
+
+        File[] jobFiles = jobsDir.listFiles();
+        if (jobFiles != null) {
+            for (File jobFile: jobFiles) {
+                if (!jobFile.isDirectory() && jobFile.getName().endsWith(".yaml")) {
+                    JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
+                    for (Job job : jobDefinition.jobs) {
+                        jobData.put(job.name, job);
+                    }
+                }
+            }
+        }
+
+        return jobData;
+    }
+
+    public static Layout readLayoutData(File layoutDir) throws FileNotFoundException {
+        Layout layoutData = null;
+
+        File layoutFile = new File(layoutDir, "layout.yaml");
+
+        if (layoutFile.exists()) {
+            Yaml layoutParser = new Yaml(new Constructor(Layout.class));
+            layoutData = (Layout) layoutParser.load(new FileReader(layoutFile));
+        }
+
+        return layoutData;
     }
 }
