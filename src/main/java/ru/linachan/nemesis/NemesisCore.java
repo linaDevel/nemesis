@@ -1,5 +1,8 @@
 package ru.linachan.nemesis;
 
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.util.ClasspathHelper;
@@ -169,5 +172,17 @@ public class NemesisCore {
 
         SSHConnection connection = getGerritConnection();
         connection.executeCommand(reviewCommand);
+    }
+
+    public JSONObject query(String query) throws IOException, ParseException {
+        String queryCommand = String.format(
+            "gerrit query --all-approvals --current-patch-set --format json -- %s",
+            query
+        );
+
+        SSHConnection connection = getGerritConnection();
+        JSONParser parser = new JSONParser();
+
+        return (JSONObject) parser.parse(connection.executeCommand(queryCommand));
     }
 }
