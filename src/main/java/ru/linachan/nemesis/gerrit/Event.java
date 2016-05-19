@@ -4,11 +4,11 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import ru.linachan.nemesis.NemesisCore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("unchecked")
 public class Event {
@@ -21,9 +21,13 @@ public class Event {
     private Long eventTime;
     private List<Approval> approvals;
 
+    private NemesisCore serviceCore;
+
     private Map customAttributes = new HashMap<>();
 
-    public Event(String eventData) {
+    public Event(String eventData, NemesisCore service) {
+        serviceCore = service;
+
         try {
             JSONObject eventObject = (JSONObject) new JSONParser().parse(eventData);
 
@@ -56,16 +60,24 @@ public class Event {
                     comment = (String) eventObject.get("reason");
                     break;
                 case COMMENT_ADDED:
-                    JSONArray approvalsData = (JSONArray) eventObject.get("approvals");
-
                     author = new Author((JSONObject) eventObject.get("author"));
                     comment = (String) eventObject.get("comment");
 
-                    if (approvalsData != null) {
-                        approvals = new ArrayList<>();
-                        for (Object approval : approvalsData) {
-                            approvals.add(new Approval((JSONObject) approval));
+                    try {
+                        JSONObject changeRequestData = serviceCore.query(changeRequest.getChangeId());
+                        JSONObject currentPatchSetData = (JSONObject) changeRequestData.get("currentPatchSet");
+                        JSONArray approvalsData = (JSONArray) currentPatchSetData.get("approvals");
+
+                        if (approvalsData != null) {
+                            approvals = new ArrayList<>();
+                            approvals.addAll(
+                                (Collection<? extends Approval>) approvalsData.stream()
+                                    .map(approval -> new Approval((JSONObject) approval))
+                                    .collect(Collectors.toList())
+                            );
                         }
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                     break;
                 case DRAFT_PUBLISHED:
