@@ -8,14 +8,15 @@ import ru.linachan.nemesis.executor.JobPublisher;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
-public class SlackPublisher implements JobPublisher {
+public class SlackPublisher extends SimplePublisher {
 
     @Override
-    public void publish(JobExecutor executor, Job job, Map<String, Object> publisher, Map<String, String> environment) throws InterruptedException, IOException {
+    public void publish() throws InterruptedException, IOException {
         JSONObject postHook = new JSONObject();
 
         Integer changeID = Integer.valueOf(environment.get("NEMESIS_CHANGE_ID"));
@@ -71,5 +72,4 @@ public class SlackPublisher implements JobPublisher {
 
         Utils.doPOST((String) publisher.get("hook"), postHook);
     }
-
 }

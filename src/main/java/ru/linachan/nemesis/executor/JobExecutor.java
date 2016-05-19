@@ -121,7 +121,10 @@ public class JobExecutor implements Runnable {
                 JobPublisher jobPublisher = getPublisher(publisher);
 
                 if (jobPublisher != null) {
-                    jobPublisher.publish(this, job, job.publishers.get(publisher), environment);
+                    jobPublisher.setUp(this, job, job.publishers.get(publisher), workingDirectory);
+                    jobPublisher.setEnvironment(environment);
+
+                    jobPublisher.publish();
                 } else {
                     putLine("ERROR[%s]: Publisher not found", publisher);
                 }
