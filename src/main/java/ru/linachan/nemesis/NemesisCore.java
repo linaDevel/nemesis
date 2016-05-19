@@ -21,6 +21,7 @@ import ru.linachan.nemesis.watchdog.JobWatchDog;
 import ru.linachan.nemesis.watchdog.LayoutWatchDog;
 import ru.linachan.nemesis.web.NemesisWeb;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -183,7 +184,7 @@ public class NemesisCore {
         SSHConnection connection = getGerritConnection();
         JSONParser parser = new JSONParser();
 
-        String queryResult = connection.executeCommand(queryCommand);
+        String queryResult = new BufferedReader(connection.executeCommandReader(queryCommand)).readLine();
         System.out.println(queryResult);
 
         return (JSONObject) parser.parse(queryResult);
