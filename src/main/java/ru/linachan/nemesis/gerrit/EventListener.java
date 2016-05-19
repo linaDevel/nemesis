@@ -28,7 +28,7 @@ public class EventListener extends Thread {
                 while (serviceInstance.isRunning()) {
                     if ((eventData = eventReader.readLine()) != null) {
                         if (eventData.length() > 0) {
-                            Event event = new Event(eventData);
+                            Event event = new Event(eventData, serviceInstance);
 
                             serviceInstance.handleEvent(event);
                         }
