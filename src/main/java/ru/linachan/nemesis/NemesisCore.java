@@ -185,7 +185,6 @@ public class NemesisCore {
         JSONParser parser = new JSONParser();
 
         String queryResult = new BufferedReader(connection.executeCommandReader(queryCommand)).readLine();
-        System.out.println(queryResult);
 
         return (JSONObject) parser.parse(queryResult);
     }
