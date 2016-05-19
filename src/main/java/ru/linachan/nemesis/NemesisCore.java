@@ -183,6 +183,9 @@ public class NemesisCore {
         SSHConnection connection = getGerritConnection();
         JSONParser parser = new JSONParser();
 
-        return (JSONObject) parser.parse(connection.executeCommand(queryCommand));
+        String queryResult = connection.executeCommand(queryCommand);
+        System.out.println(queryResult);
+
+        return (JSONObject) parser.parse(queryResult);
     }
 }
