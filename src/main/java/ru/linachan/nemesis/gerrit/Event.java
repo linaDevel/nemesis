@@ -64,16 +64,6 @@ public class Event {
                     comment = (String) eventObject.get("comment");
                     approvals = new ArrayList<>();
 
-                    JSONArray approvalsData = (JSONArray) eventObject.get("approvals");
-
-                    if (approvalsData != null) {
-                        approvals.addAll(
-                            (Collection<? extends Approval>) approvalsData.stream()
-                                .map(approval -> new Approval((JSONObject) approval))
-                                .collect(Collectors.toList())
-                        );
-                    }
-
                     try {
                         JSONObject changeRequestData = serviceCore.query(changeRequest.getChangeId());
                         JSONObject currentPatchSetData = (JSONObject) changeRequestData.get("currentPatchSet");
@@ -89,8 +79,6 @@ public class Event {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-                    System.out.println(approvals);
                     break;
                 case DRAFT_PUBLISHED:
                     author = new Author((JSONObject) eventObject.get("uploader"));
