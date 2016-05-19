@@ -1,15 +1,12 @@
 package ru.linachan.nemesis.watchdog;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.layout.Job;
-import ru.linachan.nemesis.layout.JobDefinition;
 import ru.linachan.nemesis.utils.FileWatchDog;
+import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.WatchEvent;
 import java.util.HashMap;
@@ -44,21 +41,11 @@ public class JobWatchDog extends FileWatchDog {
 
     private void checkJobFiles() throws FileNotFoundException {
         System.out.println("Reading Nemesis job definition...");
-        jobData = new HashMap<>();
 
-        Yaml jobParser = new Yaml(new Constructor(JobDefinition.class));
-
-        for (File jobFile: jobsDir.listFiles()) {
-            if (!jobFile.isDirectory()&&jobFile.getName().endsWith(".yaml")) {
-                try {
-                    JobDefinition jobDefinition = (JobDefinition) jobParser.load(new FileReader(jobFile));
-                    for (Job job : jobDefinition.jobs) {
-                        jobData.put(job.name, job);
-                    }
-                } catch (Exception e) {
-                    System.out.println(String.format("Unable to load %s: %s", jobFile.getName(), e.getMessage()));
-                }
-            }
+        try {
+            jobData = Utils.readJobConfiguration(jobsDir);
+        } catch (Exception e) {
+            System.err.println(String.format("Unable to read job configuration: %s", e.getMessage()));
         }
     }
 

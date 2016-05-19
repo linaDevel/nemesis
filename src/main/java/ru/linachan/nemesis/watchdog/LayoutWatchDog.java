@@ -1,14 +1,12 @@
 package ru.linachan.nemesis.watchdog;
 
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
 import ru.linachan.nemesis.NemesisConfig;
 import ru.linachan.nemesis.layout.Layout;
 import ru.linachan.nemesis.utils.FileWatchDog;
+import ru.linachan.nemesis.utils.Utils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.WatchEvent;
 
@@ -40,15 +38,10 @@ public class LayoutWatchDog extends FileWatchDog {
     }
 
     private void checkLayoutFile() throws FileNotFoundException {
-        File layoutFile = new File(layoutDir, "layout.yaml");
-        if (layoutFile.exists()) {
-            System.out.println("Reading Nemesis layout...");
-            Yaml layoutParser = new Yaml(new Constructor(Layout.class));
-            try {
-                layoutData = (Layout) layoutParser.load(new FileReader(layoutFile));
-            } catch(Exception e) {
-                System.out.println(String.format("Unable to load layout file: %s", e.getMessage()));
-            }
+        try {
+            layoutData = Utils.readLayoutData(layoutDir);
+        } catch (Exception e) {
+            System.err.println(String.format("Unable to read layout configuration: %s", e.getMessage()));
         }
     }
 
