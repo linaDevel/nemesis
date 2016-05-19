@@ -63,7 +63,7 @@ public class SCPPublisher extends SimplePublisher {
 
     private void sendDirectory(File directoryToSend) throws IOException {
         String directoryNameSizeInfo = String.format(
-            "D0755 0 %s\n", directoryToSend.getName()
+            "D0755 0 %s\n\0", directoryToSend.getName()
         );
 
         out.write(directoryNameSizeInfo.getBytes());
@@ -83,14 +83,14 @@ public class SCPPublisher extends SimplePublisher {
             }
         }
 
-        out.write("E".getBytes());
+        out.write("E\0".getBytes());
 
         assertAck(in);
     }
 
     private void sendFile(File fileToSend) throws IOException {
         String fileNameSizeInfo = String.format(
-            "C0644 %d %s\n",
+            "C0644 %d %s\n\0",
             fileToSend.length(), fileToSend.getName()
         );
 
