@@ -37,7 +37,9 @@ public class LayoutWatchDog extends FileWatchDog {
         checkLayoutFile();
     }
 
-    private void checkLayoutFile() throws FileNotFoundException {
+    public void checkLayoutFile() throws FileNotFoundException {
+        System.out.println("Reading Nemesis layout...");
+
         try {
             layoutData = Utils.readLayoutData(layoutDir);
         } catch (Exception e) {

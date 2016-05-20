@@ -23,6 +23,7 @@ import ru.linachan.nemesis.web.NemesisWeb;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -137,6 +138,15 @@ public class NemesisCore {
 
     public Future executeThread(Runnable thread) {
         return executorService.submit(thread);
+    }
+
+    public void readConfiguration() {
+        try {
+            layoutWatchDog.checkLayoutFile();
+            jobWatchDog.checkJobFiles();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void review(ChangeRequest change, PatchSet patchSet, String message, Score... scores) throws IOException {

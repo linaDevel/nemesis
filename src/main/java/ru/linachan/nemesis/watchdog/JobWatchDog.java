@@ -39,7 +39,7 @@ public class JobWatchDog extends FileWatchDog {
         checkJobFiles();
     }
 
-    private void checkJobFiles() throws FileNotFoundException {
+    public void checkJobFiles() throws FileNotFoundException {
         System.out.println("Reading Nemesis job definition...");
 
         try {
