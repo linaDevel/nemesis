@@ -43,6 +43,10 @@ public abstract class SimpleBuilder implements JobBuilder {
         return builder;
     }
 
+    protected JobExecutor getExecutor() {
+        return executor;
+    }
+
     protected ProcessBuilder getProcessBuilder(String... args) {
         ProcessBuilder processBuilder = new ProcessBuilder(args);
 

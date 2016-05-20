@@ -57,6 +57,9 @@ public class NemesisConfigInstaller extends SimpleBuilder {
 
     @Override
     protected void postBuild() {
+        if ((Boolean) getBuilder().getOrDefault("installConfig", false)) {
+            getExecutor().getService().readConfiguration();
+        }
         jobScript.delete();
     }
 }

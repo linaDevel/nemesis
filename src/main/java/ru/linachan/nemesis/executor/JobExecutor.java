@@ -158,6 +158,10 @@ public class JobExecutor implements Runnable {
         return job;
     }
 
+    public NemesisCore getService() {
+        return service;
+    }
+
     public void setEventData(Event event) {
         if ((event.getPatchSet() != null)&&(event.getChangeRequest() != null)) {
             environment.put("NEMESIS_URL", NemesisConfig.getGerritURL());
