@@ -8,7 +8,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.MalformedURLException;
 
-public class SSHConnection {
+public class SSHConnection implements AutoCloseable {
 
     private static final int ALIVE_INTERVAL = 30 * 1000;
     protected static final String CMD_EXEC = "exec";
@@ -42,6 +42,7 @@ public class SSHConnection {
                     throw new MalformedURLException(proxy);
                 }
             }
+            connectSession.setTimeout(3 * ALIVE_INTERVAL);
             connectSession.connect();
             connectSession.setServerAliveInterval(ALIVE_INTERVAL);
         } catch (JSchException ex) {
@@ -117,6 +118,11 @@ public class SSHConnection {
             connectSession.disconnect();
             connectSession = null;
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        disconnect();
     }
 
     static class BlindHostKeyRepository implements HostKeyRepository {

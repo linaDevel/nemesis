@@ -19,8 +19,8 @@ public class EventListener extends Thread {
 
     @Override
     public void run() {
-        if (serverLink != null) {
-            try {
+        while (true) {
+            try (SSHConnection serverLink = serviceInstance.getGerritConnection()) {
                 BufferedReader eventReader = new BufferedReader(serverLink.executeCommandReader("gerrit stream-events"));
 
                 String eventData;
@@ -34,8 +34,7 @@ public class EventListener extends Thread {
                         }
                     }
                 }
-
-            } catch (IOException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
