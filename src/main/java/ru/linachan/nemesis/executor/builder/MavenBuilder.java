@@ -23,7 +23,7 @@ public class MavenBuilder extends SimpleBuilder {
         jobScriptWriter.write("pushd ${WORKSPACE}/source\n");
 
         jobScriptWriter.write(String.format(
-            "mvn %s\n",
+            "mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true %s\n",
             StringUtils.join(((List<String>) getBuilder().get("target")).toArray(), " ")
         ));
 
