@@ -5,7 +5,7 @@ public enum ApprovalType {
     QUALITY_ASSURANCE("Quality-Assurance"),
     VERIFIED("Verified"),
     WORKFLOW("Workflow"),
-    SUBMIT("Subm");
+    SUBM("Submit");
 
     private String approvalType;
 
