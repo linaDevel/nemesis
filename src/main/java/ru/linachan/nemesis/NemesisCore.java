@@ -196,11 +196,15 @@ public class NemesisCore {
             query
         );
 
-        SSHConnection connection = getGerritConnection();
-        JSONParser parser = new JSONParser();
+        try (SSHConnection connection = getGerritConnection()) {
+            JSONParser parser = new JSONParser();
 
-        String queryResult = new BufferedReader(connection.executeCommandReader(queryCommand)).readLine();
+            String queryResult = new BufferedReader(connection.executeCommandReader(queryCommand)).readLine();
 
-        return (JSONObject) parser.parse(queryResult);
+            return (JSONObject) parser.parse(queryResult);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
