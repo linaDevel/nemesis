@@ -181,8 +181,13 @@ public class NemesisCore {
             reviewCommand += String.format(" --message \"%s\"", message);
         }
 
-        SSHConnection connection = getGerritConnection();
-        connection.executeCommand(reviewCommand);
+
+        try (SSHConnection connection = getGerritConnection()) {
+            connection.executeCommand(reviewCommand);
+            connection.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public JSONObject query(String query) throws IOException, ParseException {
