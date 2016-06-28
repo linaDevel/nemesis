@@ -30,7 +30,7 @@ public abstract class SimplePublisher implements JobPublisher {
 
     @Override
     public void setEnvironment(Map<String, String> newEnvironment) {
-        this.environment.putAll(environment);
+        this.environment.putAll(newEnvironment);
     }
 
     @Override
