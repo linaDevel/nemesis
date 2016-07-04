@@ -27,12 +27,20 @@ public class DockerBuilder extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
+        jobScriptWriter.write(
+            "DOCKER=$(which docker)\n" +
+            "if [[ -z \"${DOCKER}\" ]]; then" +
+            "\techo \"Docker is not installed!\" >&2" +
+            "\texit 1" +
+            "fi"
+        );
+
         jobScriptWriter.write(String.format(
-            "docker pull %s\n", getBuilder().getOrDefault("image", "ubuntu:trusty")
+            "$DOCKER pull %s\n", getBuilder().getOrDefault("image", "ubuntu:trusty")
         ));
 
         jobScriptWriter.write(String.format(
-            "docker run --rm --name %s -v %s:/workspace %s /bin/bash -xe /workspace/jobScript.sh\n",
+            "$DOCKER run --rm --name %s -v %s:/workspace %s /bin/bash -xe /workspace/jobScript.sh\n",
             jobScript.getName(), workingDirectory.getAbsolutePath(),
             getBuilder().getOrDefault("image", "ubuntu:trusty")
         ));

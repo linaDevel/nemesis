@@ -20,10 +20,18 @@ public class MavenBuilder extends SimpleBuilder {
 
         FileWriter jobScriptWriter = new FileWriter(jobScript);
 
+        jobScriptWriter.write(
+            "MAVEN=$(which mvn)\n" +
+            "if [[ -z \"${MAVEN}\" ]]; then" +
+            "\techo \"Maven is not installed!\" >&2" +
+            "\texit 1" +
+            "fi"
+        );
+
         jobScriptWriter.write("pushd ${WORKSPACE}/source\n");
 
         jobScriptWriter.write(String.format(
-            "mvn -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true %s\n",
+            "$MAVEN -Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true -Dmaven.wagon.http.ssl.ignore.validity.dates=true %s\n",
             StringUtils.join(((List<String>) getBuilder().get("target")).toArray(), " ")
         ));
 
