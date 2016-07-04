@@ -49,6 +49,10 @@ public class NemesisCore {
     private Reflections discoveryHelper;
     private ExecutorService executorService;
 
+    static {
+        System.setProperty("nemesis.root", NemesisConfig.getRoot().toString());
+    }
+
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
 
