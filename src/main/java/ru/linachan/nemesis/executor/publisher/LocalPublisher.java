@@ -3,10 +3,15 @@ package ru.linachan.nemesis.executor.publisher;
 import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
+import org.apache.commons.io.output.StringBuilderWriter;
+import ru.linachan.nemesis.utils.FileHash;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LocalPublisher extends SimplePublisher {
 
@@ -28,6 +33,31 @@ public class LocalPublisher extends SimplePublisher {
                     } else if (fileToPublish.isFile()) {
                         Files.copy(fileToPublish, new File(targetDirectory, fileToPublish.getName()));
                     }
+                }
+            }
+
+            if ((Boolean) publisher.get("checksum")) {
+                File[] files = targetDirectory.listFiles();
+                List<FileHash> checkSumList = new ArrayList<>();
+
+                if (files != null) {
+                    for (File file: files) {
+                        if (!file.getName().equals("CHECKSUMS")) {
+                            checkSumList.add(new FileHash(file));
+                        }
+                    }
+                }
+
+                File checkSums = new File(targetDirectory, "CHECKSUMS");
+                try(FileWriter checkSumsWriter = new FileWriter(checkSums)) {
+                    for (FileHash fileHash: checkSumList) {
+                        checkSumsWriter.write(
+                            String.format("%s\n", fileHash.toString())
+                        );
+                    }
+
+                    checkSumsWriter.flush();
+                    checkSumsWriter.close();
                 }
             }
         }
