@@ -13,7 +13,8 @@ public enum EventType {
     PROJECT_CREATED("project-created"),
     REVIEWER_ADDED("reviewer-added"),
     REF_UPDATED("ref-updated"),
-    TOPIC_CHANGED("topic-changed");
+    TOPIC_CHANGED("topic-changed"),
+    REF_REPLICATED("ref-replicated");
 
     private String eventType;
 
