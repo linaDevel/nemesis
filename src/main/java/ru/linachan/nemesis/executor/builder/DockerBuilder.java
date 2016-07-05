@@ -29,10 +29,10 @@ public class DockerBuilder extends SimpleBuilder {
 
         jobScriptWriter.write(
             "DOCKER=$(which docker)\n" +
-            "if [[ -z \"${DOCKER}\" ]]; then" +
-            "\techo \"Docker is not installed!\" >&2" +
-            "\texit 1" +
-            "fi"
+            "if [[ -z \"${DOCKER}\" ]]; then\n" +
+            "\techo \"Docker is not installed!\" >&2\n" +
+            "\texit 1\n" +
+            "fi\n"
         );
 
         jobScriptWriter.write(String.format(

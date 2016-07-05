@@ -22,10 +22,10 @@ public class MavenBuilder extends SimpleBuilder {
 
         jobScriptWriter.write(
             "MAVEN=$(which mvn)\n" +
-            "if [[ -z \"${MAVEN}\" ]]; then" +
-            "\techo \"Maven is not installed!\" >&2" +
-            "\texit 1" +
-            "fi"
+            "if [[ -z \"${MAVEN}\" ]]; then\n" +
+            "\techo \"Maven is not installed!\" >&2\n" +
+            "\texit 1\n" +
+            "fi\n"
         );
 
         jobScriptWriter.write("pushd ${WORKSPACE}/source\n");
