@@ -14,7 +14,8 @@ public enum EventType {
     REVIEWER_ADDED("reviewer-added"),
     REF_UPDATED("ref-updated"),
     TOPIC_CHANGED("topic-changed"),
-    REF_REPLICATED("ref-replicated");
+    REF_REPLICATED("ref-replicated"),
+    REF_REPLICATION_DONE("ref-replication-done");
 
     private String eventType;
 
