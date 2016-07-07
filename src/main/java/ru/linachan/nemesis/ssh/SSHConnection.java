@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 
 public class SSHConnection implements AutoCloseable {
 
-    private static final int ALIVE_INTERVAL = 30 * 1000;
+    private static final int ALIVE_INTERVAL = 20;
     protected static final String CMD_EXEC = "exec";
     protected static final int PROTO_HOST_DELIM_LENGTH = 3;
     private final JSch client;
