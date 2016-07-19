@@ -1,5 +1,8 @@
 package ru.linachan.nemesis.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
@@ -8,6 +11,8 @@ import java.nio.file.*;
 public abstract class FileWatchDog implements Runnable {
 
     private WatchService watcher;
+
+    private static Logger logger = LoggerFactory.getLogger(FileWatchDog.class);
 
     public FileWatchDog(File targetFile) throws IOException {
         watcher = FileSystems.getDefault().newWatchService();
@@ -44,7 +49,7 @@ public abstract class FileWatchDog implements Runnable {
                         onDelete(event);
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    logger.error("Something went wrong during file monitoring: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
                 }
             }
 

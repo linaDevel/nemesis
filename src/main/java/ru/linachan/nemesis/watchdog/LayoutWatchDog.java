@@ -5,6 +5,9 @@ import ru.linachan.nemesis.layout.Layout;
 import ru.linachan.nemesis.utils.FileWatchDog;
 import ru.linachan.nemesis.utils.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -14,6 +17,8 @@ public class LayoutWatchDog extends FileWatchDog {
 
     private File layoutDir;
     private Layout layoutData;
+
+    private static Logger logger = LoggerFactory.getLogger(LayoutWatchDog.class);
 
     public LayoutWatchDog() throws IOException {
         super(NemesisConfig.getPath("layout").toFile());
@@ -43,7 +48,7 @@ public class LayoutWatchDog extends FileWatchDog {
         try {
             layoutData = Utils.readLayoutData(layoutDir);
         } catch (Exception e) {
-            System.err.println(String.format("Unable to read layout configuration: %s", e.getMessage()));
+            logger.error("Unable to read layout configuration: {}", e.getMessage());
         }
     }
 

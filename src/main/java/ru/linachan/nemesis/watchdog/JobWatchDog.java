@@ -5,6 +5,9 @@ import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.FileWatchDog;
 import ru.linachan.nemesis.utils.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,6 +19,8 @@ public class JobWatchDog extends FileWatchDog {
 
     private File jobsDir;
     private Map<String, Job> jobData;
+
+    private static Logger logger = LoggerFactory.getLogger(JobWatchDog.class);
 
     public JobWatchDog() throws IOException {
         super(NemesisConfig.getPath("jobs").toFile());
@@ -45,7 +50,7 @@ public class JobWatchDog extends FileWatchDog {
         try {
             jobData = Utils.readJobConfiguration(jobsDir);
         } catch (Exception e) {
-            System.err.println(String.format("Unable to read job configuration: %s", e.getMessage()));
+            logger.error("Unable to read job configuration: {}", e.getMessage());
         }
     }
 

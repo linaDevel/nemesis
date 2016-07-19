@@ -21,6 +21,9 @@ import ru.linachan.nemesis.watchdog.JobWatchDog;
 import ru.linachan.nemesis.watchdog.LayoutWatchDog;
 import ru.linachan.nemesis.web.NemesisWeb;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -48,6 +51,8 @@ public class NemesisCore {
 
     private Reflections discoveryHelper;
     private ExecutorService executorService;
+
+    private static Logger logger = LoggerFactory.getLogger(NemesisCore.class);
 
     public NemesisCore() throws IOException {
         Runtime.getRuntime().addShutdownHook(new ShutdownHook(this));
@@ -89,7 +94,7 @@ public class NemesisCore {
 
             instance.run();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Critical failure: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
@@ -145,7 +150,7 @@ public class NemesisCore {
             layoutWatchDog.checkLayoutFile();
             jobWatchDog.checkJobFiles();
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            logger.error("Unable to read configuration. File not found: {}", e.getMessage());
         }
     }
 
@@ -186,7 +191,7 @@ public class NemesisCore {
             connection.executeCommand(reviewCommand);
             connection.disconnect();
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unable to vote: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
@@ -203,7 +208,7 @@ public class NemesisCore {
 
             return (JSONObject) parser.parse(queryResult);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Unable to query change data: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             return null;
         }
     }

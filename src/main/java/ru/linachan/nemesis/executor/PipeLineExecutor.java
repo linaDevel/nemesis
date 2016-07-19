@@ -6,6 +6,9 @@ import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.layout.PipeLine;
 import ru.linachan.nemesis.utils.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +20,8 @@ public class PipeLineExecutor implements Runnable {
     private List<Job> jobs;
     private PipeLine pipeLine;
     private Event event;
+
+    private static Logger logger = LoggerFactory.getLogger(PipeLineExecutor.class);
 
     public PipeLineExecutor(NemesisCore serviceInstance, List<Job> jobList, PipeLine pipeLineData, Event eventData) {
         service = serviceInstance;
@@ -37,7 +42,7 @@ public class PipeLineExecutor implements Runnable {
             try {
                 executor.setLogDir(Utils.createJobLogDirectory(job.name, event));
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Unable to create job log directory: {}", e.getMessage());
             }
 
             service.executeThread(executor);
@@ -55,7 +60,7 @@ public class PipeLineExecutor implements Runnable {
                     pipeLine.onStart
                 );
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Unable to send command to Gerrit: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             }
 
             while (isExecuting) {
@@ -65,9 +70,7 @@ public class PipeLineExecutor implements Runnable {
 
                 try {
                     Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                } catch (InterruptedException ignored) {}
             }
 
             String jobsResult = "";
@@ -101,7 +104,7 @@ public class PipeLineExecutor implements Runnable {
                     message, isSuccess ? pipeLine.onSuccess : pipeLine.onFailure
                 );
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Unable to send result to Gerrit: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             }
         }
     }

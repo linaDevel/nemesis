@@ -10,6 +10,9 @@ import ru.linachan.nemesis.gerrit.Event;
 import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.utils.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,6 +34,8 @@ public class JobExecutor implements Runnable {
 
     private Long startTime;
     private FileWriter logFileWriter;
+
+    private static Logger logger = LoggerFactory.getLogger(JobExecutor.class);
 
     public JobExecutor(NemesisCore serviceObject, Job jobDefinition) {
         service = serviceObject;
@@ -88,7 +93,7 @@ public class JobExecutor implements Runnable {
                 );
 
             } catch (GitAPIException e) {
-                e.printStackTrace();
+                logger.error("Unable to prepare Git repository: {}", e.getMessage());
             }
 
             for (String builder: job.builders.keySet()) {

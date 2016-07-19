@@ -6,6 +6,9 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import ru.linachan.nemesis.NemesisCore;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,6 +27,8 @@ public class Event {
     private NemesisCore serviceCore;
 
     private Map customAttributes = new HashMap<>();
+
+    private static Logger logger = LoggerFactory.getLogger(Event.class);
 
     public Event(String eventData, NemesisCore service) {
         serviceCore = service;
@@ -77,7 +82,7 @@ public class Event {
                             );
                         }
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        logger.error("Unable to handle change approvals: {}", e.getMessage());
                     }
                     break;
                 case DRAFT_PUBLISHED:
@@ -116,7 +121,7 @@ public class Event {
                     break;
             }
         } catch (ParseException e) {
-            e.printStackTrace();
+            logger.error("Unable to parse event data: {}", e.getMessage());
         }
     }
 

@@ -3,6 +3,9 @@ package ru.linachan.nemesis.gerrit;
 import ru.linachan.nemesis.NemesisCore;
 import ru.linachan.nemesis.ssh.SSHConnection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -11,6 +14,8 @@ public class EventListener extends Thread {
     private NemesisCore serviceInstance;
 
     private SSHConnection serverLink;
+
+    private static Logger logger = LoggerFactory.getLogger(EventListener.class);
 
     public EventListener(NemesisCore serviceInstanceObject) throws IOException {
         serviceInstance = serviceInstanceObject;
@@ -35,7 +40,7 @@ public class EventListener extends Thread {
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.error("EventListener failure: [{}]: {}", e.getClass().getSimpleName(), e.getMessage());
             }
         }
     }
