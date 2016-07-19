@@ -103,7 +103,7 @@ public class NemesisCore {
         executeThread(jobWatchDog);
 
         if (layoutWatchDog.getLayout() == null) {
-            System.out.println("No layout data loaded, exitting");
+            logger.error("No layout data loaded, exitting");
             System.exit(1);
         }
 

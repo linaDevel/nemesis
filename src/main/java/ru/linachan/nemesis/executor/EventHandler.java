@@ -6,6 +6,9 @@ import ru.linachan.nemesis.layout.Job;
 import ru.linachan.nemesis.layout.Score;
 import ru.linachan.nemesis.utils.Utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +21,8 @@ public class EventHandler implements Runnable {
     private NemesisCore service;
 
     private Event event;
+
+    private static Logger logger = LoggerFactory.getLogger(EventHandler.class);
 
     public EventHandler(NemesisCore serviceCore, Event incomingEvent) {
         service = serviceCore;
@@ -95,10 +100,7 @@ public class EventHandler implements Runnable {
                             });
 
                         if (isTriggered[0]) {
-                            System.out.println(String.format(
-                                "Starting %s jobs for %s",
-                                pipeLine.name, projectName
-                            ));
+                            logger.info("Starting {} jobs for {}", pipeLine.name, projectName);
 
                             List<Job> jobs = ((List<String>) projectData.get(pipeLine.name)).stream()
                                 .map(jobName -> service.getJob(jobName))
@@ -108,7 +110,7 @@ public class EventHandler implements Runnable {
                         }
                     });
             } else {
-                System.out.println(String.format("Ignoring event for project: %s", projectName));
+                logger.info("Ignoring event for project: {}", projectName);
             }
         }
     }

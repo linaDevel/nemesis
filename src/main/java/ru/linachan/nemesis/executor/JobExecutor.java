@@ -150,7 +150,7 @@ public class JobExecutor implements Runnable {
             try {
                 putLine("ERROR[%s]: %s", e.getClass().getSimpleName(), e.getMessage());
             } catch (IOException e1) {
-                e1.printStackTrace();
+                logger.error("Unable to write job log: {}", e.getMessage());
             }
             success = false;
         } finally {
