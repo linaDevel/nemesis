@@ -45,7 +45,7 @@ public class JobWatchDog extends FileWatchDog {
     }
 
     public void checkJobFiles() throws FileNotFoundException {
-        System.out.println("Reading Nemesis job definition...");
+        logger.info("Reading Nemesis job definition...");
 
         try {
             jobData = Utils.readJobConfiguration(jobsDir);

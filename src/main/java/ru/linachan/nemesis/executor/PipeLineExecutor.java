@@ -85,11 +85,11 @@ public class PipeLineExecutor implements Runnable {
                     (jobSuccess ? "SUCCESS" : "FAILURE") + (executor.getJob().voting ? "" : " (non-voting)")
                 );
 
-                System.out.println(String.format(
-                    "%s::%s : %s%s",
+                logger.info(
+                    "{}::{} : {}{}",
                     pipeLine.name, executor.getJob().name,
                     jobSuccess ? "SUCCESS" : "FAILURE", executor.getJob().voting ? "" : " (non-voting)"
-                ));
+                );
 
                 isSuccess = (!executor.getJob().voting || jobSuccess) && isSuccess;
             }
