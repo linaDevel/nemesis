@@ -78,7 +78,7 @@
                         <id>build-nemesis</id>
                         <configuration>
                             <appendAssemblyId>false</appendAssemblyId>
-                            <finalName>nemesis</finalName>
+                            <finalName>nemesis-${version}-full</finalName>
                             <archive>
                                 <manifest>
                                     <mainClass>ru.linachan.nemesis.NemesisCore</mainClass>
